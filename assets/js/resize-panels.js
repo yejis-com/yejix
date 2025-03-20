@@ -60,18 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // 너비 적용
       mainContent.style.width = newMainWidth + 'px';
       rightSidebar.style.width = newRightWidth + 'px';
-      
-      // 그래프 뷰 리사이징 이벤트 발생
-      triggerGraphResize();
     }
   });
   
   document.addEventListener('mouseup', function() {
-    if (isResizingLeft || isResizingRight) {
-      // 리사이징 종료 시 그래프 뷰 업데이트
-      triggerGraphResize();
-    }
-    
     isResizingLeft = false;
     isResizingRight = false;
     document.body.style.cursor = '';
@@ -130,19 +122,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // 너비 적용
         mainContent.style.width = newMainWidth + 'px';
         rightSidebar.style.width = newRightWidth + 'px';
-        
-        // 그래프 뷰 리사이징 이벤트 발생
-        triggerGraphResize();
       }
     }
   });
   
   document.addEventListener('touchend', function() {
-    if (isResizingLeft || isResizingRight) {
-      // 리사이징 종료 시 그래프 뷰 업데이트
-      triggerGraphResize();
-    }
-    
     isResizingLeft = false;
     isResizingRight = false;
   });
@@ -164,23 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 메인 콘텐츠 너비 조정
     const mainWidth = containerWidth - leftSidebar.offsetWidth - rightSidebar.offsetWidth;
     mainContent.style.width = mainWidth + 'px';
-    
-    // 그래프 뷰 리사이징 이벤트 발생
-    triggerGraphResize();
   });
-  
-  // 그래프 뷰 리사이징 이벤트 발생 함수
-  function triggerGraphResize() {
-    // ResizeObserver가 있는 경우 자동으로 처리되지만, 수동으로도 이벤트 발생
-    window.dispatchEvent(new Event('resize'));
-    
-    // 그래프 뷰에 직접 이벤트 발생
-    const graphWrapper = document.getElementById('graph-wrapper');
-    if (graphWrapper) {
-      const resizeEvent = new Event('resize');
-      graphWrapper.dispatchEvent(resizeEvent);
-    }
-  }
   
   // 초기 레이아웃 설정
   function initLayout() {
@@ -192,9 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
     leftSidebar.style.width = leftWidth + 'px';
     mainContent.style.width = mainWidth + 'px';
     rightSidebar.style.width = rightWidth + 'px';
-    
-    // 초기 그래프 뷰 크기 설정
-    setTimeout(triggerGraphResize, 500);
   }
   
   // 페이지 로드 시 레이아웃 초기화

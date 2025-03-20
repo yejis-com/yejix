@@ -1,6 +1,6 @@
 <style>
   .links line {
-    stroke: #8b88e6;
+    stroke: #ccc;
     opacity: 0.5;
   }
 
@@ -12,15 +12,14 @@
 
   .text text {
     cursor: pointer;
-    fill: #dcddde;
-    text-shadow: none;
-    font-size: 12px;
+    fill: #333;
+    text-shadow: -1px -1px 0 #fafafabb, 1px -1px 0 #fafafabb, -1px 1px 0 #fafafabb, 1px 1px 0 #fafafabb;
   }
 
   .nodes [active],
   .text [active] {
     cursor: pointer;
-    fill: #ffffff;
+    fill: black;
   }
 
   .inactive {
@@ -30,15 +29,13 @@
 
   #graph-wrapper {
     background: transparent;
-    border-radius: 4px;
+    border: none;
     height: 100%;
     width: 100%;
-    overflow: hidden;
   }
   
   #graph-wrapper > svg {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
     display: block;
   }
 </style>
@@ -174,44 +171,18 @@
           return true;
         };
 
-        const graphWrapper = document.getElementById('graph-wrapper');
-        const rightSidebar = document.getElementById('right-graph-sidebar');
-        
-        // SVG 요소 생성
+        const graphWrapper = document.getElementById('graph-wrapper')
         const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        
-        // 초기 크기 설정
-        const updateGraphSize = () => {
-          if (rightSidebar) {
-            const containerWidth = rightSidebar.clientWidth - 20; // 패딩 고려
-            const containerHeight = rightSidebar.clientHeight - 60; // 제목 영역 고려
-            element.setAttribute("width", containerWidth);
-            element.setAttribute("height", containerHeight);
-            
-            // 이미 시뮬레이션이 시작된 경우 중심점 업데이트
-            if (simulation) {
-              simulation.force("forceX", d3.forceX().x(containerWidth / 2));
-              simulation.force("forceY", d3.forceY().y(containerHeight / 2));
-              simulation.alpha(0.3).restart();
-            }
-          }
-        };
-        
-        // 초기 크기 설정
-        updateGraphSize();
+        element.setAttribute("width", graphWrapper.getBoundingClientRect().width);
+        element.setAttribute("height", window.innerHeight * 0.8);
         graphWrapper.appendChild(element);
 
-        // 리사이징 이벤트 리스너 추가
-        const resizeObserver = new ResizeObserver(() => {
-          updateGraphSize();
-        });
-        
-        if (rightSidebar) {
-          resizeObserver.observe(rightSidebar);
-        }
+        const reportWindowSize = () => {
+          element.setAttribute("width", window.innerWidth);
+          element.setAttribute("height", window.innerHeight);
+        };
 
-        // 윈도우 리사이즈 이벤트도 처리
-        window.addEventListener('resize', updateGraphSize);
+        window.onresize = reportWindowSize;
 
         const svg = d3.select("svg");
         const width = Number(svg.attr("width"));
@@ -334,8 +305,8 @@
         function shorten(str, maxLen, separator = ' ') {
           if (str.length <= maxLen) return str;
           return str.substr(0, str.lastIndexOf(separator, maxLen)) + '...';
-        };
-      };
-    };
+        }
+      }
+    }
   </script>
 </div>
