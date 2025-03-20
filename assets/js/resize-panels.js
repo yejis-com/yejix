@@ -1,153 +1,161 @@
 document.addEventListener('DOMContentLoaded', function() {
   const leftSidebar = document.getElementById('left-sidebar');
   const mainContent = document.getElementById('main-content');
-  const rightSidebar = document.getElementById('right-graph-sidebar');
+  const rightSidebar = document.getElementById('right-sidebar');
+  const leftResizeHandle = document.getElementById('left-resize-handle');
+  const rightResizeHandle = document.getElementById('right-resize-handle');
   const container = document.querySelector('.content-container');
   
   let isResizingLeft = false;
   let isResizingRight = false;
-  let startX, startLeftWidth, startMainWidth, startRightWidth;
+  let startX = 0;
+  let startLeftWidth = 0;
+  let startMainWidth = 0;
+  let startRightWidth = 0;
   
-  // 왼쪽 사이드바 리사이징
-  leftSidebar.addEventListener('mousedown', function(e) {
-    // 오른쪽 가장자리 영역에서만 리사이징 활성화
-    const rect = leftSidebar.getBoundingClientRect();
-    if (e.clientX > rect.right - 10 && e.clientX < rect.right + 10) {
+  // 그래프 뷰 리사이징 함수
+  function resizeGraphView() {
+    if (window.restartGraph) {
+      window.restartGraph();
+    }
+  }
+  
+  // 왼쪽 리사이즈 핸들 이벤트
+  if (leftResizeHandle) {
+    leftResizeHandle.addEventListener('mousedown', function(e) {
       isResizingLeft = true;
       startX = e.clientX;
-      startLeftWidth = leftSidebar.offsetWidth;
-      startMainWidth = mainContent.offsetWidth;
-      document.body.style.cursor = 'ew-resize';
-      e.preventDefault();
-    }
-  });
-  
-  // 메인 콘텐츠 리사이징
-  mainContent.addEventListener('mousedown', function(e) {
-    // 오른쪽 가장자리 영역에서만 리사이징 활성화
-    const rect = mainContent.getBoundingClientRect();
-    if (e.clientX > rect.right - 10 && e.clientX < rect.right + 10) {
+      startLeftWidth = parseInt(window.getComputedStyle(leftSidebar).width, 10);
+      startMainWidth = parseInt(window.getComputedStyle(mainContent).width, 10);
+      document.body.classList.add('resizing');
+    });
+  }
+
+  // 오른쪽 리사이즈 핸들 이벤트
+  if (rightResizeHandle) {
+    rightResizeHandle.addEventListener('mousedown', function(e) {
       isResizingRight = true;
       startX = e.clientX;
-      startMainWidth = mainContent.offsetWidth;
-      startRightWidth = rightSidebar.offsetWidth;
-      document.body.style.cursor = 'ew-resize';
-      e.preventDefault();
-    }
-  });
-  
+      startMainWidth = parseInt(window.getComputedStyle(mainContent).width, 10);
+      startRightWidth = parseInt(window.getComputedStyle(rightSidebar).width, 10);
+      document.body.classList.add('resizing');
+    });
+  }
+
+  // 마우스 이동 이벤트
   document.addEventListener('mousemove', function(e) {
     if (isResizingLeft) {
       const diffX = e.clientX - startX;
-      const containerWidth = container.offsetWidth;
-      
-      // 새 너비 계산
-      const newLeftWidth = Math.max(180, Math.min(startLeftWidth + diffX, containerWidth * 0.4));
-      const newMainWidth = startMainWidth - (newLeftWidth - startLeftWidth);
-      
-      // 너비 적용
+      const newLeftWidth = Math.max(250, Math.min(startLeftWidth + diffX, window.innerWidth * 0.4));
       leftSidebar.style.width = newLeftWidth + 'px';
-      mainContent.style.width = newMainWidth + 'px';
       
-    } else if (isResizingRight) {
+      // 메인 콘텐츠 너비 조정
+      const totalWidth = container.offsetWidth;
+      const rightWidth = parseInt(window.getComputedStyle(rightSidebar).width, 10);
+      const newMainWidth = totalWidth - newLeftWidth - rightWidth;
+      mainContent.style.width = newMainWidth + 'px';
+    }
+    
+    if (isResizingRight) {
       const diffX = e.clientX - startX;
-      const containerWidth = container.offsetWidth;
-      
-      // 새 너비 계산
-      const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, containerWidth - 200 - leftSidebar.offsetWidth));
-      const newRightWidth = containerWidth - newMainWidth - leftSidebar.offsetWidth;
-      
-      // 너비 적용
+      const newMainWidth = Math.max(400, Math.min(startMainWidth - diffX, window.innerWidth * 0.7));
       mainContent.style.width = newMainWidth + 'px';
-      rightSidebar.style.width = newRightWidth + 'px';
-    }
-  });
-  
-  document.addEventListener('mouseup', function() {
-    isResizingLeft = false;
-    isResizingRight = false;
-    document.body.style.cursor = '';
-  });
-  
-  // 터치 디바이스 지원
-  leftSidebar.addEventListener('touchstart', function(e) {
-    const touch = e.touches[0];
-    const rect = leftSidebar.getBoundingClientRect();
-    if (touch.clientX > rect.right - 10 && touch.clientX < rect.right + 10) {
-      isResizingLeft = true;
-      startX = touch.clientX;
-      startLeftWidth = leftSidebar.offsetWidth;
-      startMainWidth = mainContent.offsetWidth;
-      e.preventDefault();
-    }
-  });
-  
-  mainContent.addEventListener('touchstart', function(e) {
-    const touch = e.touches[0];
-    const rect = mainContent.getBoundingClientRect();
-    if (touch.clientX > rect.right - 10 && touch.clientX < rect.right + 10) {
-      isResizingRight = true;
-      startX = touch.clientX;
-      startMainWidth = mainContent.offsetWidth;
-      startRightWidth = rightSidebar.offsetWidth;
-      e.preventDefault();
-    }
-  });
-  
-  document.addEventListener('touchmove', function(e) {
-    if (isResizingLeft || isResizingRight) {
-      e.preventDefault();
-      const touch = e.touches[0];
       
-      if (isResizingLeft) {
-        const diffX = touch.clientX - startX;
-        const containerWidth = container.offsetWidth;
-        
-        // 새 너비 계산
-        const newLeftWidth = Math.max(180, Math.min(startLeftWidth + diffX, containerWidth * 0.4));
-        const newMainWidth = startMainWidth - (newLeftWidth - startLeftWidth);
-        
-        // 너비 적용
-        leftSidebar.style.width = newLeftWidth + 'px';
-        mainContent.style.width = newMainWidth + 'px';
-        
-      } else if (isResizingRight) {
-        const diffX = touch.clientX - startX;
-        const containerWidth = container.offsetWidth;
-        
-        // 새 너비 계산
-        const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, containerWidth - 200 - leftSidebar.offsetWidth));
-        const newRightWidth = containerWidth - newMainWidth - leftSidebar.offsetWidth;
-        
-        // 너비 적용
-        mainContent.style.width = newMainWidth + 'px';
-        rightSidebar.style.width = newRightWidth + 'px';
-      }
+      // 오른쪽 사이드바 너비 조정
+      const totalWidth = container.offsetWidth;
+      const leftWidth = parseInt(window.getComputedStyle(leftSidebar).width, 10);
+      const newRightWidth = totalWidth - leftWidth - newMainWidth;
+      rightSidebar.style.width = newRightWidth + 'px';
+      
+      // 그래프 뷰 리사이징
+      resizeGraphView();
     }
   });
-  
+
+  // 마우스 업 이벤트
+  document.addEventListener('mouseup', function() {
+    if (isResizingLeft || isResizingRight) {
+      isResizingLeft = false;
+      isResizingRight = false;
+      document.body.classList.remove('resizing');
+      
+      // 리사이징 완료 후 그래프 뷰 업데이트
+      resizeGraphView();
+    }
+  });
+
+  // 터치 이벤트 지원
+  if (leftResizeHandle) {
+    leftResizeHandle.addEventListener('touchstart', function(e) {
+      isResizingLeft = true;
+      startX = e.touches[0].clientX;
+      startLeftWidth = parseInt(window.getComputedStyle(leftSidebar).width, 10);
+      startMainWidth = parseInt(window.getComputedStyle(mainContent).width, 10);
+      document.body.classList.add('resizing');
+    });
+  }
+
+  if (rightResizeHandle) {
+    rightResizeHandle.addEventListener('touchstart', function(e) {
+      isResizingRight = true;
+      startX = e.touches[0].clientX;
+      startMainWidth = parseInt(window.getComputedStyle(mainContent).width, 10);
+      startRightWidth = parseInt(window.getComputedStyle(rightSidebar).width, 10);
+      document.body.classList.add('resizing');
+    });
+  }
+
+  document.addEventListener('touchmove', function(e) {
+    if (isResizingLeft) {
+      const diffX = e.touches[0].clientX - startX;
+      const newLeftWidth = Math.max(250, Math.min(startLeftWidth + diffX, window.innerWidth * 0.4));
+      leftSidebar.style.width = newLeftWidth + 'px';
+      
+      // 메인 콘텐츠 너비 조정
+      const totalWidth = container.offsetWidth;
+      const rightWidth = parseInt(window.getComputedStyle(rightSidebar).width, 10);
+      const newMainWidth = totalWidth - newLeftWidth - rightWidth;
+      mainContent.style.width = newMainWidth + 'px';
+    }
+    
+    if (isResizingRight) {
+      const diffX = e.touches[0].clientX - startX;
+      const newMainWidth = Math.max(400, Math.min(startMainWidth - diffX, window.innerWidth * 0.7));
+      mainContent.style.width = newMainWidth + 'px';
+      
+      // 오른쪽 사이드바 너비 조정
+      const totalWidth = container.offsetWidth;
+      const leftWidth = parseInt(window.getComputedStyle(leftSidebar).width, 10);
+      const newRightWidth = totalWidth - leftWidth - newMainWidth;
+      rightSidebar.style.width = newRightWidth + 'px';
+      
+      // 그래프 뷰 리사이징
+      resizeGraphView();
+    }
+  });
+
   document.addEventListener('touchend', function() {
-    isResizingLeft = false;
-    isResizingRight = false;
+    if (isResizingLeft || isResizingRight) {
+      isResizingLeft = false;
+      isResizingRight = false;
+      document.body.classList.remove('resizing');
+      
+      // 리사이징 완료 후 그래프 뷰 업데이트
+      resizeGraphView();
+    }
   });
-  
-  // 윈도우 크기 조정 시 레이아웃 재조정
+
+  // 윈도우 리사이즈 이벤트
   window.addEventListener('resize', function() {
-    const containerWidth = container.offsetWidth;
-    
-    // 사이드바가 너무 넓으면 조정
-    if (leftSidebar.offsetWidth > containerWidth * 0.4) {
-      leftSidebar.style.width = (containerWidth * 0.4) + 'px';
+    // 모바일 뷰에서는 리사이징 처리하지 않음
+    if (window.innerWidth <= 768) {
+      leftSidebar.style.width = '';
+      mainContent.style.width = '';
+      rightSidebar.style.width = '';
+    } else {
+      // 윈도우 리사이즈 시 그래프 뷰 업데이트
+      resizeGraphView();
     }
-    
-    // 오른쪽 사이드바가 너무 넓으면 조정
-    if (rightSidebar.offsetWidth > containerWidth * 0.4) {
-      rightSidebar.style.width = (containerWidth * 0.4) + 'px';
-    }
-    
-    // 메인 콘텐츠 너비 조정
-    const mainWidth = containerWidth - leftSidebar.offsetWidth - rightSidebar.offsetWidth;
-    mainContent.style.width = mainWidth + 'px';
   });
   
   // 초기 레이아웃 설정
@@ -160,8 +168,14 @@ document.addEventListener('DOMContentLoaded', function() {
     leftSidebar.style.width = leftWidth + 'px';
     mainContent.style.width = mainWidth + 'px';
     rightSidebar.style.width = rightWidth + 'px';
+    
+    // 초기 그래프 뷰 크기 설정
+    setTimeout(resizeGraphView, 500);
   }
   
   // 페이지 로드 시 레이아웃 초기화
   initLayout();
+  
+  // 그래프 뷰 리사이징 함수를 전역으로 노출
+  window.resizeGraphView = resizeGraphView;
 });

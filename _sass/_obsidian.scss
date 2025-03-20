@@ -132,6 +132,94 @@ nav {
   }
 }
 
+// 리사이징 핸들 스타일
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 10;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+
+  &:hover, body.resizing & {
+    background-color: rgba(var(--accent-rgb), 0.2);
+  }
+
+  &#left-resize-handle {
+    right: 0;
+    top: 0;
+  }
+
+  &#right-resize-handle {
+    left: 0;
+    top: 0;
+  }
+}
+
+// 그래프 뷰 스타일 개선
+#graph-wrapper {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  position: relative;
+
+  svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+
+  .nodes circle {
+    fill: var(--text-accent);
+    stroke: none;
+    transition: fill 0.2s ease;
+
+    &.inactive {
+      fill: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    &[active] {
+      fill: var(--text-accent-hover);
+      stroke: var(--background-primary);
+      stroke-width: 1.5px;
+    }
+  }
+
+  .text text {
+    fill: var(--text-normal);
+    font-family: var(--font-family-sans);
+    font-size: 14px;
+    text-anchor: middle;
+    pointer-events: none;
+    transition: fill 0.2s ease, opacity 0.2s ease;
+
+    &.inactive {
+      fill: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    &[active] {
+      fill: var(--text-accent-hover);
+      font-weight: bold;
+    }
+  }
+
+  .links line {
+    stroke: var(--text-muted);
+    opacity: 0.4;
+    transition: stroke 0.2s ease, opacity 0.2s ease;
+
+    &.inactive {
+      opacity: 0.1;
+    }
+  }
+}
+
 // 그래프 뷰 스타일링
 #notes-graph {
   width: 100%;
@@ -140,8 +228,8 @@ nav {
   display: block;
   
   svg {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     background-color: transparent;
   }
   

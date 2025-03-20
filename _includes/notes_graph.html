@@ -32,36 +32,33 @@
     border: none;
     height: 100%;
     width: 100%;
+    position: relative;
+    overflow: hidden;
   }
   
   #graph-wrapper > svg {
-    max-width: 100%;
     display: block;
+    width: 100%;
+    height: 100%;
   }
 </style>
 
 <div id="graph-wrapper">
   <script>
-    window.addEventListener("load", loadGraph);
+    window.addEventListener('DOMContentLoaded', () => {
+      const MINIMAL_NODE_SIZE = 8;
+      const MAX_NODE_SIZE = 12;
+      const ACTIVE_RADIUS_FACTOR = 1.5;
+      const STROKE = 1;
+      const FONT_SIZE = 16;
+      const TICKS = 200;
+      const FONT_BASELINE = 40;
+      const MAX_LABEL_LENGTH = 50;
 
-    function loadGraph() {
-      var oScript = document.createElement("script");
-      oScript.src = "https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js";
-      oScript.crossOrigin = 'anonymous';
-      oScript.integrity =
-        "sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==";
-      document.body.appendChild(oScript);
-      oScript.onload = () => {
-        const MINIMAL_NODE_SIZE = 8;
-        const MAX_NODE_SIZE = 12;
-        const ACTIVE_RADIUS_FACTOR = 1.5;
-        const STROKE = 1;
-        const FONT_SIZE = 16;
-        const TICKS = 200;
-        const FONT_BASELINE = 40;
-        const MAX_LABEL_LENGTH = 50;
-
-        const graphData = {% include notes_graph.json %};
+      try {
+        const graphDataStr = '{% include notes_graph.json %}';
+        const graphData = JSON.parse(graphDataStr);
+        
         let nodesData = graphData.nodes;
         let linksData = graphData.edges;
 
@@ -85,7 +82,7 @@
         };
 
         const onClick = (d) => {
-          window.location = d.path
+          window.location = d.path;
         };
 
         const onMouseover = function (d) {
@@ -171,22 +168,15 @@
           return true;
         };
 
-        const graphWrapper = document.getElementById('graph-wrapper')
+        const graphWrapper = document.getElementById('graph-wrapper');
         const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        element.setAttribute("width", graphWrapper.getBoundingClientRect().width);
-        element.setAttribute("height", window.innerHeight * 0.8);
+        element.setAttribute("width", "100%");
+        element.setAttribute("height", "100%");
         graphWrapper.appendChild(element);
 
-        const reportWindowSize = () => {
-          element.setAttribute("width", window.innerWidth);
-          element.setAttribute("height", window.innerHeight);
-        };
-
-        window.onresize = reportWindowSize;
-
         const svg = d3.select("svg");
-        const width = Number(svg.attr("width"));
-        const height = Number(svg.attr("height"));
+        const width = graphWrapper.clientWidth;
+        const height = graphWrapper.clientHeight;
         let zoomLevel = 1;
 
         const simulation = d3
@@ -245,8 +235,7 @@
             .attr("y2", (d) => d.target.y);
         };
 
-        const restart = () => {
-          updateNodeSize();
+        const updateSimulation = () => {
           node = node.data(nodesData, (d) => d.id);
           node.exit().remove();
           node = node
@@ -284,8 +273,12 @@
           simulation.nodes(nodesData);
           simulation.force("link").links(linksData);
           simulation.alpha(1).restart();
-          simulation.stop();
+        };
 
+        const restart = () => {
+          updateNodeSize();
+          updateSimulation();
+          
           for (let i = 0; i < TICKS; i++) {
             simulation.tick();
           }
@@ -300,13 +293,33 @@
 
         function isCurrentPath(notePath) {
           return window.location.pathname.includes(notePath);
-        };
+        }
 
         function shorten(str, maxLen, separator = ' ') {
           if (str.length <= maxLen) return str;
           return str.substr(0, str.lastIndexOf(separator, maxLen)) + '...';
         }
+        
+        // 그래프 뷰 리사이징을 위한 함수 추가
+        window.restartGraph = restart;
+        window.graphData = graphData;
+        
+        // 리사이징 이벤트 처리
+        const resizeObserver = new ResizeObserver(() => {
+          const newWidth = graphWrapper.clientWidth;
+          const newHeight = graphWrapper.clientHeight;
+          
+          simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
+          simulation.force("forceX", d3.forceX().x(newWidth / 2));
+          simulation.force("forceY", d3.forceY().y(newHeight / 2));
+          
+          restart();
+        });
+        
+        resizeObserver.observe(graphWrapper);
+      } catch (error) {
+        console.error("그래프 초기화 오류:", error);
       }
-    }
+    });
   </script>
 </div>

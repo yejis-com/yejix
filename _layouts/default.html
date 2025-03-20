@@ -5,14 +5,16 @@
     <nav>{% include nav.html %}</nav>
     <div class="wrapper">
       <div class="content-container">
-        <div class="left-sidebar" id="left-sidebar">
+        <div id="left-sidebar" class="left-sidebar sidebar">
           {% include sidebar.html %}
+          <div id="left-resize-handle" class="resize-handle"></div>
         </div>
-        <div class="main-content" id="main-content">
+        <div id="main-content" class="main-content">
           <main>{{ content }}</main>
           <footer>{% include footer.html %}</footer>
+          <div id="right-resize-handle" class="resize-handle"></div>
         </div>
-        <div class="right-graph-sidebar" id="right-graph-sidebar">
+        <div id="right-sidebar" class="right-graph-sidebar sidebar">
           <h3 class="graph-title">Interactive Graph</h3>
           {% include notes_graph.html %}
         </div>
