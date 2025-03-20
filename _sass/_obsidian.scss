@@ -112,6 +112,7 @@ nav {
   min-width: 300px;
   position: relative;
   height: 100%;
+  background-color: $obsidian-bg;
   
   // 리사이즈 핸들 추가
   &::after {
@@ -125,6 +126,7 @@ nav {
     cursor: ew-resize;
     opacity: 0;
     transition: opacity 0.2s;
+    z-index: 10;
   }
   
   &:hover::after {
@@ -148,6 +150,8 @@ nav {
   overflow-y: auto;
   flex-shrink: 0;
   height: 100%;
+  position: relative;
+  border-left: 1px solid $obsidian-border;
   
   .graph-title {
     color: $obsidian-text;
@@ -155,6 +159,27 @@ nav {
     margin-bottom: 1rem;
     font-size: 1rem;
     text-align: center;
+  }
+}
+
+// 그래프 뷰 스타일링
+#notes-graph {
+  width: 100%;
+  height: calc(100% - 40px);
+  overflow: hidden;
+  
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .node {
+    cursor: pointer;
+  }
+  
+  .link {
+    stroke: $obsidian-muted;
+    stroke-opacity: 0.5;
   }
 }
 

@@ -123,4 +123,19 @@ document.addEventListener('DOMContentLoaded', function() {
       rightSidebar.style.width = (window.innerWidth * 0.4) + 'px';
     }
   });
+  
+  // 초기 레이아웃 설정
+  function initLayout() {
+    const containerWidth = document.querySelector('.content-container').offsetWidth;
+    const leftWidth = 250; // 초기 왼쪽 사이드바 너비
+    const rightWidth = 300; // 초기 오른쪽 사이드바 너비
+    const mainWidth = containerWidth - leftWidth - rightWidth;
+    
+    leftSidebar.style.width = leftWidth + 'px';
+    mainContent.style.flex = '0 0 ' + mainWidth + 'px';
+    rightSidebar.style.width = rightWidth + 'px';
+  }
+  
+  // 페이지 로드 시 레이아웃 초기화
+  initLayout();
 });
