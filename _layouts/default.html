@@ -5,16 +5,14 @@
     <nav>{% include nav.html %}</nav>
     <div class="wrapper">
       <div class="content-container">
-        <div id="left-sidebar" class="left-sidebar sidebar">
+        <div class="left-sidebar" id="left-sidebar">
           {% include sidebar.html %}
-          <div id="left-resize-handle" class="resize-handle"></div>
         </div>
-        <div id="main-content" class="main-content">
+        <div class="main-content" id="main-content">
           <main>{{ content }}</main>
           <footer>{% include footer.html %}</footer>
-          <div id="right-resize-handle" class="resize-handle"></div>
         </div>
-        <div id="right-sidebar" class="right-graph-sidebar sidebar">
+        <div class="right-graph-sidebar" id="right-graph-sidebar">
           <h3 class="graph-title">Interactive Graph</h3>
           {% include notes_graph.html %}
         </div>
@@ -22,5 +20,6 @@
     </div>
 
     {% include link-previews.html wrapperQuerySelector="content" %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js" integrity="sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==" crossorigin="anonymous"></script>
   </body>
 </html>
