@@ -3,21 +3,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const mainContent = document.getElementById('main-content');
   const rightSidebar = document.getElementById('right-graph-sidebar');
   const container = document.querySelector('.content-container');
-  const notesGraph = document.getElementById('notes-graph');
   
   let isResizingLeft = false;
   let isResizingRight = false;
   let startX, startLeftWidth, startMainWidth, startRightWidth;
-  
-  // 그래프 뷰 업데이트 함수
-  function updateGraphView() {
-    if (notesGraph && window.updateGraphForce) {
-      // 그래프 뷰 SVG 크기 업데이트
-      setTimeout(() => {
-        window.updateGraphForce();
-      }, 200);
-    }
-  }
   
   // 왼쪽 사이드바 리사이징
   leftSidebar.addEventListener('mousedown', function(e) {
@@ -75,10 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.addEventListener('mouseup', function() {
-    if (isResizingLeft || isResizingRight) {
-      // 리사이징 완료 후 그래프 뷰 업데이트
-      updateGraphView();
-    }
     isResizingLeft = false;
     isResizingRight = false;
     document.body.style.cursor = '';
@@ -142,10 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   document.addEventListener('touchend', function() {
-    if (isResizingLeft || isResizingRight) {
-      // 리사이징 완료 후 그래프 뷰 업데이트
-      updateGraphView();
-    }
     isResizingLeft = false;
     isResizingRight = false;
   });
@@ -167,9 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 메인 콘텐츠 너비 조정
     const mainWidth = containerWidth - leftSidebar.offsetWidth - rightSidebar.offsetWidth;
     mainContent.style.width = mainWidth + 'px';
-    
-    // 윈도우 크기 조정 후 그래프 뷰 업데이트
-    updateGraphView();
   });
   
   // 초기 레이아웃 설정
@@ -182,9 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
     leftSidebar.style.width = leftWidth + 'px';
     mainContent.style.width = mainWidth + 'px';
     rightSidebar.style.width = rightWidth + 'px';
-    
-    // 초기 로드 시 그래프 뷰 업데이트
-    updateGraphView();
   }
   
   // 페이지 로드 시 레이아웃 초기화
