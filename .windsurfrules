@@ -1,0 +1,73 @@
+# Digital Garden Jekyll Template 기반 Obsidian 스타일 사이트를 위한 Windsurf AI 규칙
+
+## 📌 프로젝트 개요
+- **Digital Garden Jekyll Template 사용**
+- **Obsidian 스타일 UI 적용**
+- **Netlify 배포 및 GitHub Pages 지원**
+- **Jekyll Graph Plugin 사용 가능**
+- **Markdown 문서 기반 사이트**
+
+---
+
+## 📌 마크다운 변환 규칙
+- Obsidian의 `[[링크]]` 구문을 `[링크 텍스트](URL)` 형태로 변환
+- `![[파일명.jpg]]` 형식의 이미지 포함을 `<img src="파일명.jpg">` 형태로 변환
+- PDF 파일 임베딩: `![[파일명.pdf#page=2]]` ➝ `<embed src="파일명.pdf#page=2" type="application/pdf">`
+- 마크다운에서 `iframe` 지원 (`<iframe>`을 사용할 경우 필터링 방지)
+
+---
+
+## 📌 스타일 및 UI 변경 사항
+- **왼쪽 사이드바: 폴더 트리 탐색 가능**
+  - **카테고리별 정리 가능 (Advanced topics, Attachments 등)**
+  - **파일 목록 자동 생성**
+- **우측 패널: Graph View 유지**
+  - **Obsidian Interactive Graph 스타일**
+  - **노드 색상, 링크 강조 적용**
+- **다크 모드 기본 설정**
+- **Obsidian 스타일 코드 블록 하이라이팅 적용**
+- **폰트 스타일 및 색상 Obsidian 스타일과 일치**
+
+---
+
+## 📌 Jekyll 플러그인 설정
+- **Roam-style double bracket links 지원**
+- **백링크 자동 생성**
+- **Graph Visualization 플러그인 활성화**
+- **Link preview 기능 적용 (마우스 hover 시 미리보기)**
+- **파일 목록 자동 생성 (`_includes/sidebar.html`에서 적용)**
+
+---
+
+## 📌 코드 자동완성 및 내부 링크 처리
+- Jekyll에서 `[파일명]` ➝ `_site/파일명.html` 로 변환
+- 내부 링크 자동 생성 (`[[파일명]]` ➝ `[파일명](파일명.html)`)
+- 파일명에 공백이 있으면 `-`(하이픈)으로 변환
+
+---
+
+## 📌 보안 설정
+- 외부 사이트 링크에 `target="_blank"` 속성 자동 추가
+- JavaScript 인젝션 방지 (`<script>` 태그 자동 필터링)
+- **Obsidian 플러그인(iframe 포함) 보안 검사 활성화**
+- PDF 및 이미지 업로드 가능 (`.jpg`, `.png`, `.pdf` 허용)
+
+---
+
+## 📌 Git 연동 및 배포
+- **Netlify 및 GitHub Pages 지원**
+- **GitHub Actions를 통한 자동 배포**
+- `.md` 파일 변경 시 자동 커밋 및 배포
+- `_site/` 폴더 무시 (`.gitignore`에 추가)
+
+---
+
+## 📌 추가 적용 사항
+- **상단 네비게이션 바 추가 (`Home`, `Notes`, `Graph View`)**
+- **Markdown 또는 HTML 형식 지원**
+- **검색 기능 추가 (Obsidian의 `global search` 지원)**
+- **Obsidian의 태그 기능 지원 (`#태그` ➝ Jekyll `collections`로 변환)**
+
+---
+
+이제 `.windsurfrules`를 적용하면, **Obsidian 스타일의 Markdown 기반 Digital Garden Jekyll 블로그**가 정상적으로 렌더링될 것입니다! 🚀

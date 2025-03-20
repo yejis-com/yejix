@@ -1,0 +1,65 @@
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h3>Files</h3>
+  </div>
+  <div class="sidebar-content">
+    <ul class="folder-tree">
+      <!-- Main categories -->
+      <li class="folder-item">
+        <details open>
+          <summary>📁 Notes</summary>
+          <ul>
+            {% assign notes = site.notes | sort: "title" %}
+            {% for note in notes %}
+              <li class="file-item">
+                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </details>
+      </li>
+      
+      <li class="folder-item">
+        <details>
+          <summary>📁 Advanced topics</summary>
+          <ul>
+            {% assign advanced_notes = site.notes | where_exp: "item", "item.tags contains 'advanced'" | sort: "title" %}
+            {% for note in advanced_notes %}
+              <li class="file-item">
+                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </details>
+      </li>
+      
+      <li class="folder-item">
+        <details>
+          <summary>📁 Attachments</summary>
+          <ul>
+            {% assign notes_with_attachments = site.notes | where_exp: "item", "item.content contains '![['" | sort: "title" %}
+            {% for note in notes_with_attachments %}
+              <li class="file-item">
+                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </details>
+      </li>
+      
+      <li class="folder-item">
+        <details>
+          <summary>📁 Concepts</summary>
+          <ul>
+            {% assign concept_notes = site.notes | where_exp: "item", "item.tags contains 'concept'" | sort: "title" %}
+            {% for note in concept_notes %}
+              <li class="file-item">
+                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </details>
+      </li>
+    </ul>
+  </div>
+</div>

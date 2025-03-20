@@ -4,8 +4,15 @@
   <body>
     <nav>{% include nav.html %}</nav>
     <div class="wrapper">
-      <main>{{ content }}</main>
-      <footer>{% include footer.html %}</footer>
+      <div class="content-container">
+        <div class="left-sidebar">
+          {% include sidebar.html %}
+        </div>
+        <div class="main-content">
+          <main>{{ content }}</main>
+          <footer>{% include footer.html %}</footer>
+        </div>
+      </div>
     </div>
 
     {% include link-previews.html wrapperQuerySelector="content" %}

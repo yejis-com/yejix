@@ -1,0 +1,305 @@
+// Obsidian-style theme variables
+$obsidian-bg: #1e2127;
+$obsidian-text: #dcddde;
+$obsidian-muted: #9e9e9e;
+$obsidian-accent: #8b88e6;
+$obsidian-border: #393c42;
+$obsidian-sidebar-bg: #252a33;
+$obsidian-code-bg: #2d323c;
+$obsidian-hover: #383d49;
+
+// Dark mode by default
+body {
+  background-color: $obsidian-bg;
+  color: $obsidian-text;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// Main layout container
+.wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// Top navigation
+nav {
+  background-color: $obsidian-bg;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid $obsidian-border;
+  margin: 0;
+  z-index: 100;
+  
+  a {
+    color: $obsidian-text;
+    border-bottom: none;
+    
+    &:hover {
+      background: transparent !important;
+      color: $obsidian-accent !important;
+    }
+    
+    &:after {
+      content: "";
+    }
+  }
+}
+
+// Main content container
+.content-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 50px);
+}
+
+// Left sidebar with file navigation
+.left-sidebar {
+  width: 250px;
+  background-color: $obsidian-sidebar-bg;
+  overflow-y: auto;
+  flex-shrink: 0;
+  border-right: 1px solid $obsidian-border;
+}
+
+// Sidebar styling
+.sidebar {
+  padding: 0.5rem;
+  
+  .sidebar-header {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    
+    h3 {
+      color: $obsidian-text;
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+  }
+  
+  .folder-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    .folder-item {
+      margin-bottom: 0.2rem;
+      
+      summary {
+        padding: 0.3rem 0.5rem;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        
+        &:hover {
+          background-color: $obsidian-hover;
+        }
+      }
+      
+      details {
+        margin-left: 0.5rem;
+      }
+    }
+    
+    .file-item {
+      margin: 0.2rem 0;
+      padding-left: 1.5rem;
+      list-style: none;
+      
+      a {
+        color: $obsidian-muted;
+        text-decoration: none;
+        border-bottom: none;
+        display: block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        
+        &:hover {
+          background-color: $obsidian-hover;
+          color: $obsidian-text !important;
+        }
+        
+        &:after {
+          content: "";
+        }
+      }
+    }
+  }
+}
+
+// Main content area
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1rem;
+  margin: 0;
+  
+  main {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1rem 0;
+  }
+}
+
+// Notes container with graph view on right
+#notes-entry-container {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-gap: 1rem;
+  margin-top: 1rem;
+}
+
+// Notes content area
+.notes-content {
+  content {
+    display: block;
+    margin-bottom: 2rem;
+  }
+  
+  side {
+    display: block;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid $obsidian-border;
+  }
+}
+
+// Right graph container
+.right-graph-container {
+  padding: 1rem;
+  background-color: $obsidian-sidebar-bg;
+  border-radius: 6px;
+  border: 1px solid $obsidian-border;
+  
+  .graph-title {
+    color: $obsidian-text;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+  }
+}
+
+// Graph styling
+#graph-wrapper {
+  background-color: transparent !important;
+  border: none;
+  
+  svg {
+    border-radius: 4px;
+    background-color: $obsidian-sidebar-bg;
+  }
+  
+  .links line {
+    stroke: $obsidian-accent;
+    opacity: 0.3;
+  }
+  
+  .nodes circle {
+    fill: $obsidian-accent;
+  }
+  
+  .text text {
+    fill: $obsidian-text;
+    text-shadow: none;
+  }
+}
+
+// Styling for links
+a {
+  color: $obsidian-accent;
+  border-bottom: 1px dotted $obsidian-border;
+  
+  &:hover {
+    background-color: $obsidian-hover !important;
+    color: lighten($obsidian-accent, 10%) !important;
+  }
+  
+  &.internal-link {
+    color: $obsidian-accent;
+  }
+}
+
+// Markdown content styling
+h1, h2, h3, h4, h5, h6 {
+  color: $obsidian-text;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+code {
+  background-color: $obsidian-code-bg;
+  border-radius: 3px;
+  padding: 0.2em 0.4em;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+pre {
+  background-color: $obsidian-code-bg;
+  border-radius: 5px;
+  padding: 1rem;
+  overflow-x: auto;
+  
+  code {
+    background-color: transparent;
+    padding: 0;
+  }
+}
+
+blockquote {
+  border-left: 3px solid $obsidian-accent;
+  padding-left: 1rem;
+  margin-left: 0;
+  color: $obsidian-muted;
+  background-color: $obsidian-code-bg;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 5px;
+}
+
+// Backlinks
+.backlink-box {
+  background-color: $obsidian-code-bg;
+  border: 1px solid $obsidian-border;
+  border-radius: 5px;
+}
+
+// Fix for focus
+*:focus {
+  background-color: $obsidian-hover !important;
+  color: $obsidian-accent !important;
+  outline: none;
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+  }
+  
+  .left-sidebar {
+    width: 100%;
+    max-height: 300px;
+    border-right: none;
+    border-bottom: 1px solid $obsidian-border;
+  }
+  
+  #notes-entry-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .right-graph-container {
+    margin-top: 1rem;
+  }
+}
