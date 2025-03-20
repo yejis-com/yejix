@@ -35,6 +35,9 @@ nav {
   border-bottom: 1px solid $obsidian-border;
   margin: 0;
   z-index: 100;
+  height: 40px;
+  display: flex;
+  align-items: center;
   
   a {
     color: $obsidian-text;
@@ -56,16 +59,89 @@ nav {
   display: flex;
   flex: 1;
   overflow: hidden;
-  height: calc(100vh - 50px);
+  height: calc(100vh - 40px);
 }
 
 // Left sidebar with file navigation
 .left-sidebar {
   width: 250px;
+  min-width: 180px;
+  max-width: 40vw;
   background-color: $obsidian-sidebar-bg;
   overflow-y: auto;
   flex-shrink: 0;
-  border-right: 1px solid $obsidian-border;
+  position: relative;
+  
+  // 리사이즈 핸들 추가
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background-color: $obsidian-border;
+    cursor: ew-resize;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  &:hover::after {
+    opacity: 0.7;
+  }
+}
+
+// Main content area
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1rem;
+  margin: 0;
+  min-width: 300px;
+  position: relative;
+  
+  // 리사이즈 핸들 추가
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background-color: $obsidian-border;
+    cursor: ew-resize;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  &:hover::after {
+    opacity: 0.7;
+  }
+  
+  main {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1rem 0;
+  }
+}
+
+// Right graph container
+.right-graph-sidebar {
+  width: 300px;
+  min-width: 200px;
+  max-width: 40vw;
+  padding: 1rem;
+  background-color: $obsidian-sidebar-bg;
+  overflow-y: auto;
+  flex-shrink: 0;
+  
+  .graph-title {
+    color: $obsidian-text;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+  }
 }
 
 // Sidebar styling
@@ -102,25 +178,43 @@ nav {
         &:hover {
           background-color: $obsidian-hover;
         }
+        
+        .folder-icon {
+          margin-right: 5px;
+          color: $obsidian-muted;
+        }
       }
       
       details {
-        margin-left: 0.5rem;
+        margin-left: 0.2rem;
       }
+    }
+    
+    .file-list {
+      list-style: none;
+      padding-left: 1.2rem;
+      margin: 0.3rem 0;
     }
     
     .file-item {
       margin: 0.2rem 0;
-      padding-left: 1.5rem;
       list-style: none;
       
       a {
         color: $obsidian-muted;
         text-decoration: none;
         border-bottom: none;
-        display: block;
+        display: flex;
+        align-items: center;
         padding: 0.2rem 0.5rem;
         border-radius: 4px;
+        font-size: 0.9em;
+        
+        .file-icon {
+          margin-right: 5px;
+          font-size: 0.9em;
+          color: $obsidian-muted;
+        }
         
         &:hover {
           background-color: $obsidian-hover;
@@ -135,24 +229,10 @@ nav {
   }
 }
 
-// Main content area
-.main-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 1rem;
-  margin: 0;
-  
-  main {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 1rem 0;
-  }
-}
-
 // Notes container with graph view on right
 #notes-entry-container {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr;
   grid-gap: 1rem;
   margin-top: 1rem;
 }
@@ -169,22 +249,6 @@ nav {
     margin-top: 2rem;
     padding-top: 1rem;
     border-top: 1px solid $obsidian-border;
-  }
-}
-
-// Right graph container
-.right-graph-container {
-  padding: 1rem;
-  background-color: $obsidian-sidebar-bg;
-  border-radius: 6px;
-  border: 1px solid $obsidian-border;
-  
-  .graph-title {
-    color: $obsidian-text;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    text-align: center;
   }
 }
 
@@ -299,7 +363,8 @@ img {
     grid-template-columns: 1fr;
   }
   
-  .right-graph-container {
+  .right-graph-sidebar {
+    width: 100%;
     margin-top: 1rem;
   }
 }

@@ -4,15 +4,21 @@
   </div>
   <div class="sidebar-content">
     <ul class="folder-tree">
-      <!-- Main categories -->
+      <!-- 폴더 트리 구조 -->
       <li class="folder-item">
         <details open>
-          <summary>📁 Notes</summary>
-          <ul>
+          <summary class="folder-name">
+            <span class="folder-icon">📁</span>
+            <span class="folder-title">Notes</span>
+          </summary>
+          <ul class="file-list">
             {% assign notes = site.notes | sort: "title" %}
             {% for note in notes %}
               <li class="file-item">
-                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
+                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">
+                  <span class="file-icon">📄</span>
+                  <span class="file-title">{{ note.title }}</span>
+                </a>
               </li>
             {% endfor %}
           </ul>
@@ -21,42 +27,82 @@
       
       <li class="folder-item">
         <details>
-          <summary>📁 Advanced topics</summary>
-          <ul>
-            {% assign advanced_notes = site.notes | where_exp: "item", "item.tags contains 'advanced'" | sort: "title" %}
-            {% for note in advanced_notes %}
-              <li class="file-item">
-                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
-              </li>
-            {% endfor %}
+          <summary class="folder-name">
+            <span class="folder-icon">📁</span>
+            <span class="folder-title">windsurf</span>
+          </summary>
+          <ul class="file-list">
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">windsurf .windsurrules 파일</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">windsurf ai(DE) 초기 설정 방법</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">안녕하세요</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">환영합니다!</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">accents</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">consistency</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">hello</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">move your body every day</span>
+              </a>
+            </li>
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">your-first-note</span>
+              </a>
+            </li>
           </ul>
         </details>
       </li>
       
       <li class="folder-item">
         <details>
-          <summary>📁 Attachments</summary>
-          <ul>
-            {% assign notes_with_attachments = site.notes | where_exp: "item", "item.content contains '![['" | sort: "title" %}
-            {% for note in notes_with_attachments %}
-              <li class="file-item">
-                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
-              </li>
-            {% endfor %}
-          </ul>
-        </details>
-      </li>
-      
-      <li class="folder-item">
-        <details>
-          <summary>📁 Concepts</summary>
-          <ul>
-            {% assign concept_notes = site.notes | where_exp: "item", "item.tags contains 'concept'" | sort: "title" %}
-            {% for note in concept_notes %}
-              <li class="file-item">
-                <a href="{{ site.baseurl }}{{ note.url }}" class="internal-link">{{ note.title }}</a>
-              </li>
-            {% endfor %}
+          <summary class="folder-name">
+            <span class="folder-icon">📁</span>
+            <span class="folder-title">git</span>
+          </summary>
+          <ul class="file-list">
+            <li class="file-item">
+              <a href="#" class="internal-link">
+                <span class="file-icon">📄</span>
+                <span class="file-title">Git 명령어</span>
+              </a>
+            </li>
           </ul>
         </details>
       </li>
