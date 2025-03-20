@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const leftSidebar = document.getElementById('left-sidebar');
   const mainContent = document.getElementById('main-content');
   const rightSidebar = document.getElementById('right-graph-sidebar');
-  const rightResizer = document.getElementById('right-resizer');
   const container = document.querySelector('.content-container');
   
   let isResizingLeft = false;
@@ -22,28 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
     }
   });
-  
-  // 오른쪽 리사이저 요소로 리사이징
-  if (rightResizer) {
-    rightResizer.addEventListener('mousedown', function(e) {
-      isResizingRight = true;
-      startX = e.clientX;
-      startMainWidth = mainContent.offsetWidth;
-      startRightWidth = rightSidebar.offsetWidth;
-      document.body.style.cursor = 'ew-resize';
-      e.preventDefault();
-    });
-    
-    // 터치 디바이스 지원
-    rightResizer.addEventListener('touchstart', function(e) {
-      const touch = e.touches[0];
-      isResizingRight = true;
-      startX = touch.clientX;
-      startMainWidth = mainContent.offsetWidth;
-      startRightWidth = rightSidebar.offsetWidth;
-      e.preventDefault();
-    });
-  }
   
   // 메인 콘텐츠 리사이징
   mainContent.addEventListener('mousedown', function(e) {
@@ -76,8 +53,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const diffX = e.clientX - startX;
       const containerWidth = container.offsetWidth;
       
-      // 새 너비 계산 - 리사이저 방향 반대로 적용 (왼쪽에서 오른쪽으로 드래그하면 그래프 영역이 작아짐)
-      const newMainWidth = Math.max(300, Math.min(startMainWidth - diffX, containerWidth - 200 - leftSidebar.offsetWidth));
+      // 새 너비 계산
+      const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, containerWidth - 200 - leftSidebar.offsetWidth));
       const newRightWidth = containerWidth - newMainWidth - leftSidebar.offsetWidth;
       
       // 너비 적용
@@ -138,8 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const diffX = touch.clientX - startX;
         const containerWidth = container.offsetWidth;
         
-        // 새 너비 계산 - 리사이저 방향 반대로 적용
-        const newMainWidth = Math.max(300, Math.min(startMainWidth - diffX, containerWidth - 200 - leftSidebar.offsetWidth));
+        // 새 너비 계산
+        const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, containerWidth - 200 - leftSidebar.offsetWidth));
         const newRightWidth = containerWidth - newMainWidth - leftSidebar.offsetWidth;
         
         // 너비 적용
@@ -183,11 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
     leftSidebar.style.width = leftWidth + 'px';
     mainContent.style.width = mainWidth + 'px';
     rightSidebar.style.width = rightWidth + 'px';
-    
-    // 리사이저 위치 설정
-    if (rightResizer) {
-      rightResizer.style.left = '0';
-    }
   }
   
   // 페이지 로드 시 레이아웃 초기화

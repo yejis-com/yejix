@@ -14,15 +14,11 @@
         </div>
         <div class="right-graph-sidebar" id="right-graph-sidebar">
           <h3 class="graph-title">Interactive Graph</h3>
-          <div id="graph-container">
-            {% include notes_graph.html %}
-          </div>
-          <div class="resizer" id="right-resizer"></div>
+          {% include notes_graph.html %}
         </div>
       </div>
     </div>
 
     {% include link-previews.html wrapperQuerySelector="content" %}
-    <script src="/assets/js/resize-panels.js"></script>
   </body>
 </html>

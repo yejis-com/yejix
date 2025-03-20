@@ -12,14 +12,14 @@
 
   .text text {
     cursor: pointer;
-    fill: #dcddde;
-    text-shadow: -1px -1px 0 #252a33, 1px -1px 0 #252a33, -1px 1px 0 #252a33, 1px 1px 0 #252a33;
+    fill: #333;
+    text-shadow: -1px -1px 0 #fafafabb, 1px -1px 0 #fafafabb, -1px 1px 0 #fafafabb, 1px 1px 0 #fafafabb;
   }
 
   .nodes [active],
   .text [active] {
     cursor: pointer;
-    fill: #dcddde;
+    fill: black;
   }
 
   .inactive {
@@ -28,10 +28,9 @@
   }
 
   #graph-wrapper {
-    background: #252a33;
+    background: #fcfcfc;
     border-radius: 4px;
-    height: 100%;
-    overflow: hidden;
+    height: auto;
   }
   
   #graph-wrapper > svg {
@@ -51,7 +50,7 @@
       oScript.integrity =
         "sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==";
       document.body.appendChild(oScript);
-      oScript.onload = function() {
+      oScript.onload = () => {
         const MINIMAL_NODE_SIZE = 8;
         const MAX_NODE_SIZE = 12;
         const ACTIVE_RADIUS_FACTOR = 1.5;
@@ -61,42 +60,19 @@
         const FONT_BASELINE = 40;
         const MAX_LABEL_LENGTH = 50;
 
-        /* Jekyll Graph Data */
-        const graphData = { 
-          "nodes": [
-            {% for note in site.notes %}
-              {
-                "id": "{{ note.url | slugify }}",
-                "path": "{{ note.url }}",
-                "title": "{{ note.title }}"
-              }{% unless forloop.last %},{% endunless %}
-            {% endfor %}
-          ],
-          "edges": [
-            {% for note in site.notes %}
-              {% for backlink in note.backlinks %}
-                {
-                  "source": "{{ note.url | slugify }}",
-                  "target": "{{ backlink.url | slugify }}"
-                }{% unless forloop.last %},{% endunless %}
-              {% endfor %}
-            {% endfor %}
-          ]
-        };
-        
-        const nodesData = graphData.nodes;
-        const linksData = graphData.edges;
+        const graphData = {% include notes_graph.json %}
+        let nodesData = graphData.nodes;
+        let linksData = graphData.edges;
 
         const nodeSize = {};
 
-        const updateNodeSize = function() {
-          nodesData.forEach(function(el) {
+        const updateNodeSize = () => {
+          nodesData.forEach((el) => {
             let weight =
               3 *
               Math.sqrt(
-                linksData.filter(function(l) { 
-                  return l.source.id === el.id || l.target.id === el.id;
-                }).length + 1
+                linksData.filter((l) => l.source.id === el.id || l.target.id === el.id)
+                  .length + 1
               );
             if (weight < MINIMAL_NODE_SIZE) {
               weight = MINIMAL_NODE_SIZE;
@@ -107,43 +83,40 @@
           });
         };
 
-        const onClick = function(d) {
-          window.location = d.path;
+        const onClick = (d) => {
+          window.location = d.path
         };
 
-        const onMouseover = function(d) {
+        const onMouseover = function (d) {
           const relatedNodesSet = new Set();
           linksData
-            .filter(function(n) { 
-              return n.target.id == d.id || n.source.id == d.id;
-            })
-            .forEach(function(n) {
+            .filter((n) => n.target.id == d.id || n.source.id == d.id)
+            .forEach((n) => {
               relatedNodesSet.add(n.target.id);
               relatedNodesSet.add(n.source.id);
             });
 
-          node.attr("class", function(node_d) {
+          node.attr("class", (node_d) => {
             if (node_d.id !== d.id && !relatedNodesSet.has(node_d.id)) {
               return "inactive";
             }
             return "";
           });
 
-          link.attr("class", function(link_d) {
+          link.attr("class", (link_d) => {
             if (link_d.source.id !== d.id && link_d.target.id !== d.id) {
               return "inactive";
             }
             return "";
           });
 
-          link.attr("stroke-width", function(link_d) {
+          link.attr("stroke-width", (link_d) => {
             if (link_d.source.id === d.id || link_d.target.id === d.id) {
               return STROKE * 4;
             }
             return STROKE;
           });
-          
-          text.attr("class", function(text_d) {
+          text.attr("class", (text_d) => {
             if (text_d.id !== d.id && !relatedNodesSet.has(text_d.id)) {
               return "inactive";
             }
@@ -151,30 +124,70 @@
           });
         };
 
-        const onMouseout = function(d) {
+        const onMouseout = function (d) {
           node.attr("class", "");
           link.attr("class", "");
           text.attr("class", "");
           link.attr("stroke-width", STROKE);
         };
 
-        const graphWrapper = document.getElementById('graph-wrapper');
-        const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        element.setAttribute("width", graphWrapper.getBoundingClientRect().width);
-        element.setAttribute("height", graphWrapper.getBoundingClientRect().height);
-        graphWrapper.appendChild(element);
+        const sameNodes = (previous, next) => {
+          if (next.length !== previous.length) {
+            return false;
+          }
 
-        const reportWindowSize = function() {
-          element.setAttribute("width", graphWrapper.getBoundingClientRect().width);
-          element.setAttribute("height", graphWrapper.getBoundingClientRect().height);
+          const map = new Map();
+          for (const node of previous) {
+            map.set(node.id, node.label);
+          }
+
+          for (const node of next) {
+            const found = map.get(node.id);
+            if (!found || found !== node.title) {
+              return false;
+            }
+          }
+
+          return true;
         };
 
-        window.addEventListener('resize', reportWindowSize);
+        const sameEdges = (previous, next) => {
+          if (next.length !== previous.length) {
+            return false;
+          }
+
+          const set = new Set();
+          for (const edge of previous) {
+            set.add(`${edge.source.id}-${edge.target.id}`);
+          }
+
+          for (const edge of next) {
+            if (!set.has(`${edge.source.id}-${edge.target.id}`)) {
+              return false;
+            }
+          }
+
+          return true;
+        };
+
+        const graphWrapper = document.getElementById('graph-wrapper')
+        const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        element.setAttribute("width", graphWrapper.getBoundingClientRect().width);
+        element.setAttribute("height", window.innerHeight * 0.8);
+        graphWrapper.appendChild(element);
+
+        const reportWindowSize = () => {
+          element.setAttribute("width", window.innerWidth);
+          element.setAttribute("height", window.innerHeight);
+        };
+
+        window.onresize = reportWindowSize;
 
         const svg = d3.select("svg");
         const width = Number(svg.attr("width"));
         const height = Number(svg.attr("height"));
-        
+        let zoomLevel = 1;
+
         const simulation = d3
           .forceSimulation(nodesData)
           .force("forceX", d3.forceX().x(width / 2))
@@ -184,7 +197,7 @@
             "link",
             d3
               .forceLink(linksData)
-              .id(function(d) { return d.id; })
+              .id((d) => d.id)
               .distance(70)
           )
           .force("center", d3.forceCenter(width / 2, height / 2))
@@ -196,85 +209,76 @@
         let node = g.append("g").attr("class", "nodes").selectAll(".node");
         let text = g.append("g").attr("class", "text").selectAll(".text");
 
-        const resize = function() {
+        const resize = () => {
           if (d3.event) {
             const scale = d3.event.transform;
             zoomLevel = scale.k;
             g.attr("transform", scale);
           }
 
-          const zoomOrKeep = function(value) {
-            return zoomLevel >= 1 ? value / zoomLevel : value;
-          };
+          const zoomOrKeep = (value) => (zoomLevel >= 1 ? value / zoomLevel : value);
 
           const font = Math.max(Math.round(zoomOrKeep(FONT_SIZE)), 1);
 
-          text.attr("font-size", function(d) {
-            return font + "px";
-          });
-          text.attr("y", function(d) {
-            return d.y - zoomOrKeep(FONT_BASELINE) + 8;
-          });
+          text.attr("font-size", (d) => font);
+          text.attr("y", (d) => d.y - zoomOrKeep(FONT_BASELINE) + 8);
           link.attr("stroke-width", zoomOrKeep(STROKE));
-          node.attr("r", function(d) {
+          node.attr("r", (d) => {
             return zoomOrKeep(nodeSize[d.id]);
           });
           svg
-            .selectAll(".text")
-            .select("textPath")
-            .attr("xlink:href", function(d) {
-              return "#arrow-" + d.source.index + "-" + d.target.index;
-            });
+            .selectAll("circle")
+            .filter((_d, i, nodes) => d3.select(nodes[i]).attr("active"))
+            .attr("r", (d) => zoomOrKeep(ACTIVE_RADIUS_FACTOR * nodeSize[d.id]));
         };
 
-        const ticked = function() {
-          node.attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; });
+        const ticked = () => {
+          node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
           text
-            .attr("x", function(d) { return d.x; })
-            .attr("y", function(d) { return d.y - FONT_BASELINE; });
+            .attr("x", (d) => d.x)
+            .attr("y", (d) => d.y - (FONT_BASELINE - nodeSize[d.id]) / zoomLevel);
           link
-            .attr("x1", function(d) { return d.source.x; })
-            .attr("y1", function(d) { return d.source.y; })
-            .attr("x2", function(d) { return d.target.x; })
-            .attr("y2", function(d) { return d.target.y; });
+            .attr("x1", (d) => d.source.x)
+            .attr("y1", (d) => d.source.y)
+            .attr("x2", (d) => d.target.x)
+            .attr("y2", (d) => d.target.y);
         };
 
-        const restart = function() {
+        const restart = () => {
           updateNodeSize();
-          node = node.data(nodesData, function(d) { return d.id; });
+          node = node.data(nodesData, (d) => d.id);
           node.exit().remove();
           node = node
             .enter()
             .append("circle")
-            .attr("r", function(d) { return nodeSize[d.id]; })
+            .attr("r", (d) => {
+              return nodeSize[d.id];
+            })
             .on("click", onClick)
             .on("mouseover", onMouseover)
             .on("mouseout", onMouseout)
             .merge(node);
 
-          link = link.data(linksData, function(d) {
-            return d.source.id + "-" + d.target.id;
-          });
+          link = link.data(linksData, (d) => `${d.source.id}-${d.target.id}`);
           link.exit().remove();
-          link = link
-            .enter()
-            .append("line")
-            .attr("stroke-width", STROKE)
-            .merge(link);
+          link = link.enter().append("line").attr("stroke-width", STROKE).merge(link);
 
-          text = text.data(nodesData, function(d) { return d.id; });
+          text = text.data(nodesData, (d) => d.label);
           text.exit().remove();
           text = text
             .enter()
             .append("text")
-            .text(function(d) {
-              return d.title;
-            })
+            .text((d) => shorten(d.label.replace(/_*/g, ""), MAX_LABEL_LENGTH))
+            .attr("font-size", `${FONT_SIZE}px`)
+            .attr("text-anchor", "middle")
+            .attr("alignment-baseline", "central")
             .on("click", onClick)
             .on("mouseover", onMouseover)
             .on("mouseout", onMouseout)
             .merge(text);
+
+          node.attr("active", (d) => isCurrentPath(d.path) ? true : null);
+          text.attr("active", (d) => isCurrentPath(d.path) ? true : null);
 
           simulation.nodes(nodesData);
           simulation.force("link").links(linksData);
@@ -288,23 +292,20 @@
           ticked();
         };
 
-        const zoomHandler = d3
-          .zoom()
-          .scaleExtent([0.2, 3])
-          .on("zoom", resize);
+        const zoomHandler = d3.zoom().scaleExtent([0.2, 3]).on("zoom", resize);
 
         zoomHandler(svg);
         restart();
 
         function isCurrentPath(notePath) {
-          return window.location.pathname.includes(notePath);
+          return window.location.pathname.includes(notePath)
         }
 
         function shorten(str, maxLen, separator = ' ') {
           if (str.length <= maxLen) return str;
           return str.substr(0, str.lastIndexOf(separator, maxLen)) + '...';
         }
-      };
+      }
     }
   </script>
 </div>
