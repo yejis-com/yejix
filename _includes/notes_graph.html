@@ -43,7 +43,7 @@
 </style>
 
 <script>
-  // 샘플 그래프 데이터 설정
+  // 그래프 데이터 설정
   window.sampleGraphData = {
     nodes: [
       { id: "index", title: "Home", path: "/index.html" },
@@ -57,273 +57,268 @@
       { source: "sample1", target: "sample2" }
     ]
   };
+  
+  {% if site.data.notes_graph %}
+  window.actualGraphData = {{ site.data.notes_graph | jsonify }};
+  {% endif %}
 </script>
 
 <div id="graph-wrapper">
-  <script>
-    window.addEventListener("load", loadGraph);
-
-    function loadGraph() {
-      var oScript = document.createElement("script");
-      oScript.src = "https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js";
-      oScript.crossOrigin = 'anonymous';
-      oScript.integrity =
-        "sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==";
-      document.body.appendChild(oScript);
-      oScript.onload = () => {
-        const MINIMAL_NODE_SIZE = 8;
-        const MAX_NODE_SIZE = 12;
-        const ACTIVE_RADIUS_FACTOR = 1.5;
-        const STROKE = 1;
-        const FONT_SIZE = 16;
-        const TICKS = 200;
-        const FONT_BASELINE = 40;
-        const MAX_LABEL_LENGTH = 50;
-
-        // 그래프 데이터 설정
-        let graphData = window.sampleGraphData;
-        
-        let nodesData = graphData.nodes;
-        let linksData = graphData.edges;
-
-        const nodeSize = {};
-
-        const updateNodeSize = () => {
-          nodesData.forEach((el) => {
-            let weight =
-              3 *
-              Math.sqrt(
-                linksData.filter((l) => l.source.id === el.id || l.target.id === el.id)
-                  .length + 1
-              );
-            if (weight < MINIMAL_NODE_SIZE) {
-              weight = MINIMAL_NODE_SIZE;
-            } else if (weight > MAX_NODE_SIZE) {
-              weight = MAX_NODE_SIZE;
-            }
-            nodeSize[el.id] = weight;
-          });
-        };
-
-        const onClick = (d) => {
-          window.location = d.path
-        };
-
-        const onMouseover = function (d) {
-          const relatedNodesSet = new Set();
-          linksData
-            .filter((n) => n.target.id == d.id || n.source.id == d.id)
-            .forEach((n) => {
-              relatedNodesSet.add(n.target.id);
-              relatedNodesSet.add(n.source.id);
-            });
-
-          node.attr("class", (node_d) => {
-            if (node_d.id !== d.id && !relatedNodesSet.has(node_d.id)) {
-              return "inactive";
-            }
-            return "";
-          });
-
-          link.attr("class", (link_d) => {
-            if (link_d.source.id !== d.id && link_d.target.id !== d.id) {
-              return "inactive";
-            }
-            return "";
-          });
-
-          link.attr("stroke-width", (link_d) => {
-            if (link_d.source.id === d.id || link_d.target.id === d.id) {
-              return STROKE * 4;
-            }
-            return STROKE;
-          });
-          text.attr("class", (text_d) => {
-            if (text_d.id !== d.id && !relatedNodesSet.has(text_d.id)) {
-              return "inactive";
-            }
-            return "";
-          });
-        };
-
-        const onMouseout = function (d) {
-          node.attr("class", "");
-          link.attr("class", "");
-          text.attr("class", "");
-          link.attr("stroke-width", STROKE);
-        };
-
-        const sameNodes = (previous, next) => {
-          if (next.length !== previous.length) {
-            return false;
-          }
-
-          const map = new Map();
-          for (const node of previous) {
-            map.set(node.id, node.label);
-          }
-
-          for (const node of next) {
-            const found = map.get(node.id);
-            if (!found || found !== node.title) {
-              return false;
-            }
-          }
-
-          return true;
-        };
-
-        const sameEdges = (previous, next) => {
-          if (next.length !== previous.length) {
-            return false;
-          }
-
-          const set = new Set();
-          for (const edge of previous) {
-            set.add(`${edge.source.id}-${edge.target.id}`);
-          }
-
-          for (const edge of next) {
-            if (!set.has(`${edge.source.id}-${edge.target.id}`)) {
-              return false;
-            }
-          }
-
-          return true;
-        };
-
-        const graphWrapper = document.getElementById('graph-wrapper');
-        const rightSidebar = document.getElementById('right-graph-sidebar');
-        const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        
-        // 초기 그래프 크기 설정
-        function updateGraphSize() {
-          const containerWidth = rightSidebar.clientWidth - 20; // 패딩 고려
-          const containerHeight = rightSidebar.clientHeight - 60; // 제목 및 패딩 고려
-          
-          element.setAttribute("width", containerWidth);
-          element.setAttribute("height", containerHeight);
-          
-          if (simulation) {
-            simulation.force("forceX", d3.forceX().x(containerWidth / 2))
-                      .force("forceY", d3.forceY().y(containerHeight / 2))
-                      .alpha(0.3).restart();
-          }
-        }
-        
-        updateGraphSize();
-        graphWrapper.appendChild(element);
-
-        // 윈도우 크기 변경 시 그래프 크기 업데이트
-        window.addEventListener('resize', updateGraphSize);
-        
-        // 패널 리사이징 이벤트 감지 및 그래프 크기 업데이트
-        const resizeObserver = new ResizeObserver(entries => {
-          updateGraphSize();
-        });
-        
-        resizeObserver.observe(rightSidebar);
-
-        const svg = d3.select("svg");
-        let width = Number(svg.attr("width"));
-        let height = Number(svg.attr("height"));
-        let zoomLevel = 1;
-
-        const simulation = d3
-          .forceSimulation(nodesData)
-          .force("forceX", d3.forceX().x(width / 2))
-          .force("forceY", d3.forceY().y(height / 2))
-          .force("charge", d3.forceManyBody())
-          .force(
-            "link",
-            d3
-              .forceLink(linksData)
-              .id((d) => d.id)
-              .distance(70)
-          );
-          
-        // 전역 변수로 시뮬레이션 객체 저장
-        window.graphSimulation = simulation;
-        window.d3 = d3;
-
-        const g = svg.append("g");
-        let link = g.append("g").attr("class", "links").selectAll(".link");
-        let node = g.append("g").attr("class", "nodes").selectAll(".node");
-        let text = g.append("g").attr("class", "text").selectAll(".text");
-
-        const resize = () => {
-          updateNodeSize();
-          
-          link = link.data(linksData, (d) => `${d.source.id}-${d.target.id}`);
-          link.exit().remove();
-          link = link
-            .enter()
-            .append("line")
-            .attr("class", "link")
-            .attr("stroke-width", STROKE)
-            .merge(link);
-
-          node = node.data(nodesData, (d) => d.id);
-          node.exit().remove();
-          node = node
-            .enter()
-            .append("circle")
-            .attr("class", "node")
-            .attr("r", (d) => {
-              return nodeSize[d.id];
-            })
-            .on("click", onClick)
-            .on("mouseover", onMouseover)
-            .on("mouseout", onMouseout)
-            .merge(node);
-
-          text = text.data(nodesData, (d) => d.id);
-          text.exit().remove();
-          text = text
-            .enter()
-            .append("text")
-            .text((d) => {
-              const label = d.title;
-              return label.length <= MAX_LABEL_LENGTH
-                ? label
-                : `${label.slice(0, MAX_LABEL_LENGTH)}...`;
-            })
-            .attr("class", "text")
-            .attr("font-size", `${FONT_SIZE}px`)
-            .attr("text-anchor", "middle")
-            .attr("alignment-baseline", "central")
-            .on("click", onClick)
-            .on("mouseover", onMouseover)
-            .on("mouseout", onMouseout)
-            .merge(text);
-
-          simulation.nodes(nodesData);
-          simulation.force("link").links(linksData);
-          simulation.alpha(1).restart();
-          simulation.stop();
-
-          for (let i = 0; i < TICKS; i++) {
-            simulation.tick();
-          }
-
-          link
-            .attr("x1", (d) => d.source.x)
-            .attr("y1", (d) => d.source.y)
-            .attr("x2", (d) => d.target.x)
-            .attr("y2", (d) => d.target.y);
-
-          node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-          text.attr("x", (d) => d.x).attr("y", (d) => d.y);
-        };
-
-        resize();
-
-        // 그래프 리사이즈 이벤트 리스너
-        rightSidebar.addEventListener('graphResize', function() {
-          updateGraphSize();
-          resize();
-        });
-      };
-    }
-  </script>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    loadGraph();
+  });
+
+  function loadGraph() {
+    // D3.js 라이브러리 로드
+    if (typeof d3 === 'undefined') {
+      var script = document.createElement('script');
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js";
+      script.integrity = "sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==";
+      script.crossOrigin = "anonymous";
+      script.onload = initializeGraph;
+      document.head.appendChild(script);
+    } else {
+      initializeGraph();
+    }
+  }
+
+  function initializeGraph() {
+    const MINIMAL_NODE_SIZE = 8;
+    const MAX_NODE_SIZE = 12;
+    const ACTIVE_RADIUS_FACTOR = 1.5;
+    const STROKE = 1;
+    const FONT_SIZE = 16;
+    const TICKS = 200;
+    const FONT_BASELINE = 40;
+    const MAX_LABEL_LENGTH = 50;
+
+    // 그래프 데이터 설정 (실제 데이터 또는 샘플 데이터)
+    let graphData = window.actualGraphData || window.sampleGraphData;
+    
+    let nodesData = graphData.nodes;
+    let linksData = graphData.edges;
+
+    const nodeSize = {};
+
+    const updateNodeSize = () => {
+      nodesData.forEach((el) => {
+        let weight =
+          3 *
+          Math.sqrt(
+            linksData.filter((l) => 
+              (l.source === el.id || l.source.id === el.id) || 
+              (l.target === el.id || l.target.id === el.id)
+            ).length + 1
+          );
+        if (weight < MINIMAL_NODE_SIZE) {
+          weight = MINIMAL_NODE_SIZE;
+        } else if (weight > MAX_NODE_SIZE) {
+          weight = MAX_NODE_SIZE;
+        }
+        nodeSize[el.id] = weight;
+      });
+    };
+
+    const onClick = (d) => {
+      window.location = d.path;
+    };
+
+    const onMouseover = function (d) {
+      const relatedNodesSet = new Set();
+      linksData
+        .filter((n) => {
+          const sourceId = typeof n.source === 'object' ? n.source.id : n.source;
+          const targetId = typeof n.target === 'object' ? n.target.id : n.target;
+          return sourceId === d.id || targetId === d.id;
+        })
+        .forEach((n) => {
+          const sourceId = typeof n.source === 'object' ? n.source.id : n.source;
+          const targetId = typeof n.target === 'object' ? n.target.id : n.target;
+          relatedNodesSet.add(sourceId);
+          relatedNodesSet.add(targetId);
+        });
+
+      node.attr("class", (node_d) => {
+        if (node_d.id !== d.id && !relatedNodesSet.has(node_d.id)) {
+          return "inactive";
+        }
+        return "";
+      });
+
+      link.attr("class", (link_d) => {
+        const sourceId = typeof link_d.source === 'object' ? link_d.source.id : link_d.source;
+        const targetId = typeof link_d.target === 'object' ? link_d.target.id : link_d.target;
+        
+        if (sourceId !== d.id && targetId !== d.id) {
+          return "inactive";
+        }
+        return "";
+      });
+
+      link.attr("stroke-width", (link_d) => {
+        const sourceId = typeof link_d.source === 'object' ? link_d.source.id : link_d.source;
+        const targetId = typeof link_d.target === 'object' ? link_d.target.id : link_d.target;
+        
+        if (sourceId === d.id || targetId === d.id) {
+          return STROKE * 4;
+        }
+        return STROKE;
+      });
+      
+      text.attr("class", (text_d) => {
+        if (text_d.id !== d.id && !relatedNodesSet.has(text_d.id)) {
+          return "inactive";
+        }
+        return "";
+      });
+    };
+
+    const onMouseout = function (d) {
+      node.attr("class", "");
+      link.attr("class", "");
+      text.attr("class", "");
+      link.attr("stroke-width", STROKE);
+    };
+
+    // 그래프 컨테이너 설정
+    const graphWrapper = document.getElementById('graph-wrapper');
+    const rightSidebar = document.getElementById('right-graph-sidebar');
+    
+    // SVG 요소 생성
+    const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    graphWrapper.innerHTML = ''; // 기존 내용 제거
+    graphWrapper.appendChild(element);
+    
+    // 초기 그래프 크기 설정
+    function updateGraphSize() {
+      if (!rightSidebar) return;
+      
+      const containerWidth = rightSidebar.clientWidth - 20; // 패딩 고려
+      const containerHeight = rightSidebar.clientHeight - 60; // 제목 및 패딩 고려
+      
+      element.setAttribute("width", containerWidth > 0 ? containerWidth : 300);
+      element.setAttribute("height", containerHeight > 0 ? containerHeight : 500);
+      
+      if (simulation) {
+        simulation.force("center", d3.forceCenter(containerWidth / 2, containerHeight / 2))
+                  .alpha(0.3).restart();
+      }
+    }
+    
+    updateGraphSize();
+
+    // 윈도우 크기 변경 시 그래프 크기 업데이트
+    window.addEventListener('resize', updateGraphSize);
+    
+    // 패널 리사이징 이벤트 감지 및 그래프 크기 업데이트
+    if (window.ResizeObserver) {
+      const resizeObserver = new ResizeObserver(entries => {
+        updateGraphSize();
+      });
+      
+      if (rightSidebar) {
+        resizeObserver.observe(rightSidebar);
+      }
+    }
+
+    const svg = d3.select("#graph-wrapper svg");
+    const width = Number(svg.attr("width"));
+    const height = Number(svg.attr("height"));
+
+    // 시뮬레이션 설정
+    const simulation = d3
+      .forceSimulation(nodesData)
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("charge", d3.forceManyBody().strength(-150))
+      .force(
+        "link",
+        d3
+          .forceLink(linksData)
+          .id((d) => d.id)
+          .distance(70)
+      );
+
+    const g = svg.append("g");
+    let link = g.append("g").attr("class", "links").selectAll(".link");
+    let node = g.append("g").attr("class", "nodes").selectAll(".node");
+    let text = g.append("g").attr("class", "text").selectAll(".text");
+
+    const resize = () => {
+      updateNodeSize();
+      
+      link = link.data(linksData, (d) => `${typeof d.source === 'object' ? d.source.id : d.source}-${typeof d.target === 'object' ? d.target.id : d.target}`);
+      link.exit().remove();
+      link = link
+        .enter()
+        .append("line")
+        .attr("class", "link")
+        .attr("stroke-width", STROKE)
+        .merge(link);
+
+      node = node.data(nodesData, (d) => d.id);
+      node.exit().remove();
+      node = node
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("r", (d) => {
+          return nodeSize[d.id] || MINIMAL_NODE_SIZE;
+        })
+        .on("click", onClick)
+        .on("mouseover", onMouseover)
+        .on("mouseout", onMouseout)
+        .merge(node);
+
+      text = text.data(nodesData, (d) => d.id);
+      text.exit().remove();
+      text = text
+        .enter()
+        .append("text")
+        .text((d) => {
+          const label = d.title;
+          return label.length <= MAX_LABEL_LENGTH
+            ? label
+            : `${label.slice(0, MAX_LABEL_LENGTH)}...`;
+        })
+        .attr("class", "text")
+        .attr("font-size", `${FONT_SIZE}px`)
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "central")
+        .on("click", onClick)
+        .on("mouseover", onMouseover)
+        .on("mouseout", onMouseout)
+        .merge(text);
+
+      simulation.nodes(nodesData);
+      simulation.force("link").links(linksData);
+      simulation.alpha(1).restart();
+      simulation.stop();
+
+      for (let i = 0; i < TICKS; i++) {
+        simulation.tick();
+      }
+
+      link
+        .attr("x1", (d) => d.source.x)
+        .attr("y1", (d) => d.source.y)
+        .attr("x2", (d) => d.target.x)
+        .attr("y2", (d) => d.target.y);
+
+      node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+      text.attr("x", (d) => d.x).attr("y", (d) => d.y);
+    };
+
+    resize();
+
+    // 그래프 리사이징 이벤트 리스너
+    if (rightSidebar) {
+      rightSidebar.addEventListener('graphResize', function() {
+        updateGraphSize();
+        resize();
+      });
+    }
+  }
+</script>
