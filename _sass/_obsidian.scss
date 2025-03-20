@@ -131,12 +131,10 @@ nav {
 }
 
 // 그래프 뷰 스타일링
-#graph-wrapper {
+#notes-graph {
   width: 100%;
   height: calc(100% - 40px);
   overflow: hidden;
-  background-color: $obsidian-sidebar-bg;
-  border-radius: 4px;
   
   svg {
     width: 100%;
