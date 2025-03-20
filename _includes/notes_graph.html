@@ -1,6 +1,6 @@
 <style>
   .links line {
-    stroke: #ccc;
+    stroke: #8b88e6;
     opacity: 0.5;
   }
 
@@ -12,14 +12,14 @@
 
   .text text {
     cursor: pointer;
-    fill: #333;
-    text-shadow: -1px -1px 0 #fafafabb, 1px -1px 0 #fafafabb, -1px 1px 0 #fafafabb, 1px 1px 0 #fafafabb;
+    fill: #dcddde;
+    text-shadow: none;
   }
 
   .nodes [active],
   .text [active] {
     cursor: pointer;
-    fill: black;
+    fill: #ffffff;
   }
 
   .inactive {
@@ -28,16 +28,36 @@
   }
 
   #graph-wrapper {
-    background: #fcfcfc;
+    background: #252a33;
     border-radius: 4px;
-    height: auto;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
   }
   
   #graph-wrapper > svg {
-    max-width: 100%;
+    width: 100%;
+    height: 100%;
     display: block;
   }
 </style>
+
+<script>
+  // 샘플 그래프 데이터 설정
+  window.sampleGraphData = {
+    nodes: [
+      { id: "index", title: "Home", path: "/index.html" },
+      { id: "about", title: "About", path: "/about.html" },
+      { id: "sample1", title: "Sample Note 1", path: "/notes/sample1.html" },
+      { id: "sample2", title: "Sample Note 2", path: "/notes/sample2.html" }
+    ],
+    edges: [
+      { source: "index", target: "about" },
+      { source: "index", target: "sample1" },
+      { source: "sample1", target: "sample2" }
+    ]
+  };
+</script>
 
 <div id="graph-wrapper">
   <script>
@@ -60,7 +80,9 @@
         const FONT_BASELINE = 40;
         const MAX_LABEL_LENGTH = 50;
 
-        const graphData = {% include notes_graph.json %}
+        // 그래프 데이터 설정
+        let graphData = window.sampleGraphData;
+        
         let nodesData = graphData.nodes;
         let linksData = graphData.edges;
 
@@ -230,47 +252,23 @@
         let text = g.append("g").attr("class", "text").selectAll(".text");
 
         const resize = () => {
-          if (d3.event) {
-            const scale = d3.event.transform;
-            zoomLevel = scale.k;
-            g.attr("transform", scale);
-          }
-
-          const zoomOrKeep = (value) => (zoomLevel >= 1 ? value / zoomLevel : value);
-
-          const font = Math.max(Math.round(zoomOrKeep(FONT_SIZE)), 1);
-
-          text.attr("font-size", (d) => font);
-          text.attr("y", (d) => d.y - zoomOrKeep(FONT_BASELINE) + 8);
-          link.attr("stroke-width", zoomOrKeep(STROKE));
-          node.attr("r", (d) => {
-            return zoomOrKeep(nodeSize[d.id]);
-          });
-          svg
-            .selectAll("circle")
-            .filter((_d, i, nodes) => d3.select(nodes[i]).attr("active"))
-            .attr("r", (d) => zoomOrKeep(ACTIVE_RADIUS_FACTOR * nodeSize[d.id]));
-        };
-
-        const ticked = () => {
-          node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-          text
-            .attr("x", (d) => d.x)
-            .attr("y", (d) => d.y - (FONT_BASELINE - nodeSize[d.id]) / zoomLevel);
-          link
-            .attr("x1", (d) => d.source.x)
-            .attr("y1", (d) => d.source.y)
-            .attr("x2", (d) => d.target.x)
-            .attr("y2", (d) => d.target.y);
-        };
-
-        const restart = () => {
           updateNodeSize();
+          
+          link = link.data(linksData, (d) => `${d.source.id}-${d.target.id}`);
+          link.exit().remove();
+          link = link
+            .enter()
+            .append("line")
+            .attr("class", "link")
+            .attr("stroke-width", STROKE)
+            .merge(link);
+
           node = node.data(nodesData, (d) => d.id);
           node.exit().remove();
           node = node
             .enter()
             .append("circle")
+            .attr("class", "node")
             .attr("r", (d) => {
               return nodeSize[d.id];
             })
@@ -279,16 +277,18 @@
             .on("mouseout", onMouseout)
             .merge(node);
 
-          link = link.data(linksData, (d) => `${d.source.id}-${d.target.id}`);
-          link.exit().remove();
-          link = link.enter().append("line").attr("stroke-width", STROKE).merge(link);
-
-          text = text.data(nodesData, (d) => d.label);
+          text = text.data(nodesData, (d) => d.id);
           text.exit().remove();
           text = text
             .enter()
             .append("text")
-            .text((d) => shorten(d.label.replace(/_*/g, ""), MAX_LABEL_LENGTH))
+            .text((d) => {
+              const label = d.title;
+              return label.length <= MAX_LABEL_LENGTH
+                ? label
+                : `${label.slice(0, MAX_LABEL_LENGTH)}...`;
+            })
+            .attr("class", "text")
             .attr("font-size", `${FONT_SIZE}px`)
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "central")
@@ -296,9 +296,6 @@
             .on("mouseover", onMouseover)
             .on("mouseout", onMouseout)
             .merge(text);
-
-          node.attr("active", (d) => isCurrentPath(d.path) ? true : null);
-          text.attr("active", (d) => isCurrentPath(d.path) ? true : null);
 
           simulation.nodes(nodesData);
           simulation.force("link").links(linksData);
@@ -309,23 +306,24 @@
             simulation.tick();
           }
 
-          ticked();
+          link
+            .attr("x1", (d) => d.source.x)
+            .attr("y1", (d) => d.source.y)
+            .attr("x2", (d) => d.target.x)
+            .attr("y2", (d) => d.target.y);
+
+          node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+          text.attr("x", (d) => d.x).attr("y", (d) => d.y);
         };
 
-        const zoomHandler = d3.zoom().scaleExtent([0.2, 3]).on("zoom", resize);
+        resize();
 
-        zoomHandler(svg);
-        restart();
-
-        function isCurrentPath(notePath) {
-          return window.location.pathname.includes(notePath)
-        }
-
-        function shorten(str, maxLen, separator = ' ') {
-          if (str.length <= maxLen) return str;
-          return str.substr(0, str.lastIndexOf(separator, maxLen)) + '...';
-        }
-      }
+        // 그래프 리사이즈 이벤트 리스너
+        rightSidebar.addEventListener('graphResize', function() {
+          updateGraphSize();
+          resize();
+        });
+      };
     }
   </script>
 </div>
