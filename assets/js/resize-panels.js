@@ -8,6 +8,34 @@ document.addEventListener('DOMContentLoaded', function() {
   let isResizingRight = false;
   let startX, startLeftWidth, startMainWidth, startRightWidth;
   
+  // 그래프 뷰 업데이트 함수
+  function updateGraphView() {
+    // 사용자 정의 이벤트 생성 및 발생
+    const graphResizeEvent = new CustomEvent('graphResize');
+    rightSidebar.dispatchEvent(graphResizeEvent);
+    
+    // 그래프 뷰가 있는 경우 크기 조정
+    const graphWrapper = document.getElementById('graph-wrapper');
+    if (graphWrapper) {
+      const svg = graphWrapper.querySelector('svg');
+      if (svg) {
+        const containerWidth = rightSidebar.clientWidth - 20; // 패딩 고려
+        const containerHeight = rightSidebar.clientHeight - 60; // 제목 및 패딩 고려
+        
+        svg.setAttribute('width', containerWidth);
+        svg.setAttribute('height', containerHeight);
+        
+        // D3 시뮬레이션이 있는 경우 업데이트
+        if (window.d3 && window.graphSimulation) {
+          window.graphSimulation
+            .force("forceX", d3.forceX().x(containerWidth / 2))
+            .force("forceY", d3.forceY().y(containerHeight / 2))
+            .alpha(0.3).restart();
+        }
+      }
+    }
+  }
+  
   // 왼쪽 사이드바 리사이징
   leftSidebar.addEventListener('mousedown', function(e) {
     // 오른쪽 가장자리 영역에서만 리사이징 활성화
@@ -60,10 +88,18 @@ document.addEventListener('DOMContentLoaded', function() {
       // 너비 적용
       mainContent.style.width = newMainWidth + 'px';
       rightSidebar.style.width = newRightWidth + 'px';
+      
+      // 그래프 뷰 업데이트
+      updateGraphView();
     }
   });
   
   document.addEventListener('mouseup', function() {
+    if (isResizingLeft || isResizingRight) {
+      // 리사이징 종료 시 그래프 뷰 최종 업데이트
+      updateGraphView();
+    }
+    
     isResizingLeft = false;
     isResizingRight = false;
     document.body.style.cursor = '';
@@ -122,11 +158,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // 너비 적용
         mainContent.style.width = newMainWidth + 'px';
         rightSidebar.style.width = newRightWidth + 'px';
+        
+        // 그래프 뷰 업데이트
+        updateGraphView();
       }
     }
   });
   
   document.addEventListener('touchend', function() {
+    if (isResizingLeft || isResizingRight) {
+      // 리사이징 종료 시 그래프 뷰 최종 업데이트
+      updateGraphView();
+    }
+    
     isResizingLeft = false;
     isResizingRight = false;
   });
@@ -148,6 +192,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 메인 콘텐츠 너비 조정
     const mainWidth = containerWidth - leftSidebar.offsetWidth - rightSidebar.offsetWidth;
     mainContent.style.width = mainWidth + 'px';
+    
+    // 그래프 뷰 업데이트
+    updateGraphView();
   });
   
   // 초기 레이아웃 설정
@@ -160,6 +207,9 @@ document.addEventListener('DOMContentLoaded', function() {
     leftSidebar.style.width = leftWidth + 'px';
     mainContent.style.width = mainWidth + 'px';
     rightSidebar.style.width = rightWidth + 'px';
+    
+    // 초기 그래프 뷰 업데이트
+    setTimeout(updateGraphView, 500); // 페이지 로드 후 약간의 지연을 두고 업데이트
   }
   
   // 페이지 로드 시 레이아웃 초기화

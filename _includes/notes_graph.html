@@ -170,22 +170,41 @@
           return true;
         };
 
-        const graphWrapper = document.getElementById('graph-wrapper')
+        const graphWrapper = document.getElementById('graph-wrapper');
+        const rightSidebar = document.getElementById('right-graph-sidebar');
         const element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        element.setAttribute("width", graphWrapper.getBoundingClientRect().width);
-        element.setAttribute("height", window.innerHeight * 0.8);
+        
+        // 초기 그래프 크기 설정
+        function updateGraphSize() {
+          const containerWidth = rightSidebar.clientWidth - 20; // 패딩 고려
+          const containerHeight = rightSidebar.clientHeight - 60; // 제목 및 패딩 고려
+          
+          element.setAttribute("width", containerWidth);
+          element.setAttribute("height", containerHeight);
+          
+          if (simulation) {
+            simulation.force("forceX", d3.forceX().x(containerWidth / 2))
+                      .force("forceY", d3.forceY().y(containerHeight / 2))
+                      .alpha(0.3).restart();
+          }
+        }
+        
+        updateGraphSize();
         graphWrapper.appendChild(element);
 
-        const reportWindowSize = () => {
-          element.setAttribute("width", window.innerWidth);
-          element.setAttribute("height", window.innerHeight);
-        };
-
-        window.onresize = reportWindowSize;
+        // 윈도우 크기 변경 시 그래프 크기 업데이트
+        window.addEventListener('resize', updateGraphSize);
+        
+        // 패널 리사이징 이벤트 감지 및 그래프 크기 업데이트
+        const resizeObserver = new ResizeObserver(entries => {
+          updateGraphSize();
+        });
+        
+        resizeObserver.observe(rightSidebar);
 
         const svg = d3.select("svg");
-        const width = Number(svg.attr("width"));
-        const height = Number(svg.attr("height"));
+        let width = Number(svg.attr("width"));
+        let height = Number(svg.attr("height"));
         let zoomLevel = 1;
 
         const simulation = d3
@@ -199,10 +218,11 @@
               .forceLink(linksData)
               .id((d) => d.id)
               .distance(70)
-          )
-          .force("center", d3.forceCenter(width / 2, height / 2))
-          .force("collision", d3.forceCollide().radius(80))
-          .stop();
+          );
+          
+        // 전역 변수로 시뮬레이션 객체 저장
+        window.graphSimulation = simulation;
+        window.d3 = d3;
 
         const g = svg.append("g");
         let link = g.append("g").attr("class", "links").selectAll(".link");
