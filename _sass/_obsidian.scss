@@ -7,6 +7,8 @@ $obsidian-border: #393c42;
 $obsidian-sidebar-bg: #252a33;
 $obsidian-code-bg: #2d323c;
 $obsidian-hover: #383d49;
+$resize-handle-color: #8b88e6;
+$resize-handle-width: 5px;
 
 // Dark mode by default
 body {
@@ -83,55 +85,22 @@ nav {
   flex-shrink: 0;
   position: relative;
   height: 100%;
-  
-  // 리사이즈 핸들 추가
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 4px;
-    height: 100%;
-    background-color: $obsidian-border;
-    cursor: ew-resize;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  
-  &:hover::after {
-    opacity: 0.7;
-  }
+  border-right: $resize-handle-width solid $resize-handle-color;
+  box-sizing: border-box;
 }
 
 // Main content area
 .main-content {
-  flex: 1;
+  width: calc(100% - 550px);
+  min-width: 300px;
   overflow-y: auto;
   padding: 0 1rem;
   margin: 0;
-  min-width: 300px;
   position: relative;
   height: 100%;
   background-color: $obsidian-bg;
-  
-  // 리사이즈 핸들 추가
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 4px;
-    height: 100%;
-    background-color: $obsidian-border;
-    cursor: ew-resize;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 10;
-  }
-  
-  &:hover::after {
-    opacity: 0.7;
-  }
+  border-right: $resize-handle-width solid $resize-handle-color;
+  box-sizing: border-box;
   
   main {
     max-width: 100%;
@@ -151,7 +120,6 @@ nav {
   flex-shrink: 0;
   height: 100%;
   position: relative;
-  border-left: 1px solid $obsidian-border;
   
   .graph-title {
     color: $obsidian-text;
@@ -208,190 +176,136 @@ nav {
     }
   }
   
-  .folder-tree {
-    list-style: none;
+  .sidebar-content {
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      
+      li {
+        margin: 0.2rem 0;
+        
+        a {
+          display: flex;
+          align-items: center;
+          color: $obsidian-text;
+          text-decoration: none;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          
+          &:hover {
+            background-color: $obsidian-hover;
+          }
+          
+          .file-icon {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+          }
+          
+          .file-title {
+            font-size: 0.9rem;
+          }
+        }
+      }
+      
+      .folder {
+        margin-bottom: 0.5rem;
+        
+        .folder-name {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          
+          &:hover {
+            background-color: $obsidian-hover;
+          }
+          
+          .folder-icon {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+          }
+          
+          .folder-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+          }
+        }
+        
+        .folder-content {
+          padding-left: 1.5rem;
+        }
+      }
+    }
+  }
+}
+
+// Backlinks section
+.backlinks-container {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid $obsidian-border;
+  
+  h3 {
+    color: $obsidian-text;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  ul {
+    list-style-type: none;
     padding: 0;
-    margin: 0;
     
-    .folder-item {
-      margin-bottom: 0.2rem;
-      
-      summary {
-        padding: 0.3rem 0.5rem;
-        cursor: pointer;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        
-        &:hover {
-          background-color: $obsidian-hover;
-        }
-        
-        .folder-icon {
-          margin-right: 5px;
-          color: $obsidian-muted;
-        }
-      }
-      
-      details {
-        margin-left: 0.2rem;
-      }
-    }
-    
-    .file-list {
-      list-style: none;
-      padding-left: 1.2rem;
-      margin: 0.3rem 0;
-    }
-    
-    .file-item {
-      margin: 0.2rem 0;
-      list-style: none;
+    li {
+      margin: 0.5rem 0;
       
       a {
-        color: $obsidian-muted;
+        color: $obsidian-accent;
         text-decoration: none;
-        border-bottom: none;
-        display: flex;
-        align-items: center;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.9em;
-        
-        .file-icon {
-          margin-right: 5px;
-          font-size: 0.9em;
-          color: $obsidian-muted;
-        }
         
         &:hover {
-          background-color: $obsidian-hover;
-          color: $obsidian-text !important;
-        }
-        
-        &:after {
-          content: "";
+          text-decoration: underline;
         }
       }
     }
   }
 }
 
-// Notes container with graph view on right
-#notes-entry-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-gap: 1rem;
-  margin-top: 1rem;
-}
-
-// Notes content area
-.notes-content {
-  content {
-    display: block;
-    margin-bottom: 2rem;
-  }
-  
-  side {
-    display: block;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid $obsidian-border;
-  }
-}
-
-// Graph styling
-#graph-wrapper {
-  background-color: transparent !important;
-  border: none;
-  
-  svg {
-    border-radius: 4px;
-    background-color: $obsidian-sidebar-bg;
-  }
-  
-  .links line {
-    stroke: $obsidian-accent;
-    opacity: 0.3;
-  }
-  
-  .nodes circle {
-    fill: $obsidian-accent;
-  }
-  
-  .text text {
-    fill: $obsidian-text;
-    text-shadow: none;
-  }
-}
-
-// Styling for links
-a {
-  color: $obsidian-accent;
-  border-bottom: 1px dotted $obsidian-border;
-  
-  &:hover {
-    background-color: $obsidian-hover !important;
-    color: lighten($obsidian-accent, 10%) !important;
-  }
-  
-  &.internal-link {
-    color: $obsidian-accent;
-  }
-}
-
-// Markdown content styling
-h1, h2, h3, h4, h5, h6 {
-  color: $obsidian-text;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-}
-
-code {
+// Code blocks
+pre, code {
   background-color: $obsidian-code-bg;
-  border-radius: 3px;
-  padding: 0.2em 0.4em;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  font-size: 0.9em;
+  border-radius: 4px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }
 
 pre {
-  background-color: $obsidian-code-bg;
-  border-radius: 5px;
   padding: 1rem;
   overflow-x: auto;
+}
+
+code {
+  padding: 0.2rem 0.4rem;
+}
+
+// Link styles
+a {
+  color: $obsidian-accent;
+  text-decoration: none;
   
-  code {
-    background-color: transparent;
-    padding: 0;
+  &:hover {
+    text-decoration: underline;
   }
 }
 
-blockquote {
-  border-left: 3px solid $obsidian-accent;
-  padding-left: 1rem;
-  margin-left: 0;
-  color: $obsidian-muted;
-  background-color: $obsidian-code-bg;
-}
-
-img {
-  max-width: 100%;
-  border-radius: 5px;
-}
-
-// Backlinks
-.backlink-box {
-  background-color: $obsidian-code-bg;
-  border: 1px solid $obsidian-border;
-  border-radius: 5px;
-}
-
-// Fix for focus
-*:focus {
-  background-color: $obsidian-hover !important;
-  color: $obsidian-accent !important;
-  outline: none;
+// Internal links
+.internal-link {
+  color: $obsidian-accent;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 // Mobile responsiveness
@@ -400,19 +314,23 @@ img {
     flex-direction: column;
   }
   
-  .left-sidebar {
+  .left-sidebar, .main-content, .right-graph-sidebar {
     width: 100%;
-    max-height: 300px;
+    max-width: 100%;
     border-right: none;
+  }
+  
+  .left-sidebar {
+    height: 300px;
     border-bottom: 1px solid $obsidian-border;
   }
   
-  #notes-entry-container {
-    grid-template-columns: 1fr;
+  .main-content {
+    flex: 1;
   }
   
   .right-graph-sidebar {
-    width: 100%;
-    margin-top: 1rem;
+    height: 300px;
+    border-top: 1px solid $obsidian-border;
   }
 }

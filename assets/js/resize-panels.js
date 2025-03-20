@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const leftSidebar = document.getElementById('left-sidebar');
   const mainContent = document.getElementById('main-content');
   const rightSidebar = document.getElementById('right-graph-sidebar');
+  const container = document.querySelector('.content-container');
   
   let isResizingLeft = false;
   let isResizingRight = false;
@@ -10,10 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // 왼쪽 사이드바 리사이징
   leftSidebar.addEventListener('mousedown', function(e) {
     // 오른쪽 가장자리 영역에서만 리사이징 활성화
-    if (e.clientX > leftSidebar.getBoundingClientRect().right - 8) {
+    const rect = leftSidebar.getBoundingClientRect();
+    if (e.clientX > rect.right - 10 && e.clientX < rect.right + 10) {
       isResizingLeft = true;
       startX = e.clientX;
       startLeftWidth = leftSidebar.offsetWidth;
+      startMainWidth = mainContent.offsetWidth;
       document.body.style.cursor = 'ew-resize';
       e.preventDefault();
     }
@@ -22,7 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // 메인 콘텐츠 리사이징
   mainContent.addEventListener('mousedown', function(e) {
     // 오른쪽 가장자리 영역에서만 리사이징 활성화
-    if (e.clientX > mainContent.getBoundingClientRect().right - 8) {
+    const rect = mainContent.getBoundingClientRect();
+    if (e.clientX > rect.right - 10 && e.clientX < rect.right + 10) {
       isResizingRight = true;
       startX = e.clientX;
       startMainWidth = mainContent.offsetWidth;
@@ -35,22 +39,27 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('mousemove', function(e) {
     if (isResizingLeft) {
       const diffX = e.clientX - startX;
-      const newWidth = Math.max(180, Math.min(startLeftWidth + diffX, window.innerWidth * 0.4));
-      leftSidebar.style.width = newWidth + 'px';
+      const containerWidth = container.offsetWidth;
+      
+      // 새 너비 계산
+      const newLeftWidth = Math.max(180, Math.min(startLeftWidth + diffX, containerWidth * 0.4));
+      const newMainWidth = startMainWidth - (newLeftWidth - startLeftWidth);
+      
+      // 너비 적용
+      leftSidebar.style.width = newLeftWidth + 'px';
+      mainContent.style.width = newMainWidth + 'px';
+      
     } else if (isResizingRight) {
       const diffX = e.clientX - startX;
-      const containerWidth = document.querySelector('.content-container').offsetWidth;
+      const containerWidth = container.offsetWidth;
       
-      // 메인 콘텐츠와 오른쪽 사이드바의 너비 조정
-      const leftWidth = leftSidebar.offsetWidth;
-      const availableWidth = containerWidth - leftWidth;
-      const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, availableWidth - 200));
-      const newRightWidth = availableWidth - newMainWidth;
+      // 새 너비 계산
+      const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, containerWidth - 200 - leftSidebar.offsetWidth));
+      const newRightWidth = containerWidth - newMainWidth - leftSidebar.offsetWidth;
       
-      if (newRightWidth >= 200) {
-        mainContent.style.flex = '0 0 ' + newMainWidth + 'px';
-        rightSidebar.style.width = newRightWidth + 'px';
-      }
+      // 너비 적용
+      mainContent.style.width = newMainWidth + 'px';
+      rightSidebar.style.width = newRightWidth + 'px';
     }
   });
   
@@ -63,20 +72,25 @@ document.addEventListener('DOMContentLoaded', function() {
   // 터치 디바이스 지원
   leftSidebar.addEventListener('touchstart', function(e) {
     const touch = e.touches[0];
-    if (touch.clientX > leftSidebar.getBoundingClientRect().right - 8) {
+    const rect = leftSidebar.getBoundingClientRect();
+    if (touch.clientX > rect.right - 10 && touch.clientX < rect.right + 10) {
       isResizingLeft = true;
       startX = touch.clientX;
       startLeftWidth = leftSidebar.offsetWidth;
+      startMainWidth = mainContent.offsetWidth;
+      e.preventDefault();
     }
   });
   
   mainContent.addEventListener('touchstart', function(e) {
     const touch = e.touches[0];
-    if (touch.clientX > mainContent.getBoundingClientRect().right - 8) {
+    const rect = mainContent.getBoundingClientRect();
+    if (touch.clientX > rect.right - 10 && touch.clientX < rect.right + 10) {
       isResizingRight = true;
       startX = touch.clientX;
       startMainWidth = mainContent.offsetWidth;
       startRightWidth = rightSidebar.offsetWidth;
+      e.preventDefault();
     }
   });
   
@@ -87,21 +101,27 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (isResizingLeft) {
         const diffX = touch.clientX - startX;
-        const newWidth = Math.max(180, Math.min(startLeftWidth + diffX, window.innerWidth * 0.4));
-        leftSidebar.style.width = newWidth + 'px';
+        const containerWidth = container.offsetWidth;
+        
+        // 새 너비 계산
+        const newLeftWidth = Math.max(180, Math.min(startLeftWidth + diffX, containerWidth * 0.4));
+        const newMainWidth = startMainWidth - (newLeftWidth - startLeftWidth);
+        
+        // 너비 적용
+        leftSidebar.style.width = newLeftWidth + 'px';
+        mainContent.style.width = newMainWidth + 'px';
+        
       } else if (isResizingRight) {
-        const containerWidth = document.querySelector('.content-container').offsetWidth;
         const diffX = touch.clientX - startX;
+        const containerWidth = container.offsetWidth;
         
-        const leftWidth = leftSidebar.offsetWidth;
-        const availableWidth = containerWidth - leftWidth;
-        const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, availableWidth - 200));
-        const newRightWidth = availableWidth - newMainWidth;
+        // 새 너비 계산
+        const newMainWidth = Math.max(300, Math.min(startMainWidth + diffX, containerWidth - 200 - leftSidebar.offsetWidth));
+        const newRightWidth = containerWidth - newMainWidth - leftSidebar.offsetWidth;
         
-        if (newRightWidth >= 200) {
-          mainContent.style.flex = '0 0 ' + newMainWidth + 'px';
-          rightSidebar.style.width = newRightWidth + 'px';
-        }
+        // 너비 적용
+        mainContent.style.width = newMainWidth + 'px';
+        rightSidebar.style.width = newRightWidth + 'px';
       }
     }
   });
@@ -113,26 +133,32 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 윈도우 크기 조정 시 레이아웃 재조정
   window.addEventListener('resize', function() {
+    const containerWidth = container.offsetWidth;
+    
     // 사이드바가 너무 넓으면 조정
-    if (leftSidebar.offsetWidth > window.innerWidth * 0.4) {
-      leftSidebar.style.width = (window.innerWidth * 0.4) + 'px';
+    if (leftSidebar.offsetWidth > containerWidth * 0.4) {
+      leftSidebar.style.width = (containerWidth * 0.4) + 'px';
     }
     
     // 오른쪽 사이드바가 너무 넓으면 조정
-    if (rightSidebar.offsetWidth > window.innerWidth * 0.4) {
-      rightSidebar.style.width = (window.innerWidth * 0.4) + 'px';
+    if (rightSidebar.offsetWidth > containerWidth * 0.4) {
+      rightSidebar.style.width = (containerWidth * 0.4) + 'px';
     }
+    
+    // 메인 콘텐츠 너비 조정
+    const mainWidth = containerWidth - leftSidebar.offsetWidth - rightSidebar.offsetWidth;
+    mainContent.style.width = mainWidth + 'px';
   });
   
   // 초기 레이아웃 설정
   function initLayout() {
-    const containerWidth = document.querySelector('.content-container').offsetWidth;
+    const containerWidth = container.offsetWidth;
     const leftWidth = 250; // 초기 왼쪽 사이드바 너비
     const rightWidth = 300; // 초기 오른쪽 사이드바 너비
     const mainWidth = containerWidth - leftWidth - rightWidth;
     
     leftSidebar.style.width = leftWidth + 'px';
-    mainContent.style.flex = '0 0 ' + mainWidth + 'px';
+    mainContent.style.width = mainWidth + 'px';
     rightSidebar.style.width = rightWidth + 'px';
   }
   
