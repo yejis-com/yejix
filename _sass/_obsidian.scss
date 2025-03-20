@@ -125,54 +125,73 @@ nav {
   
   .graph-title {
     color: $obsidian-text;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
     font-size: 1rem;
     text-align: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid $obsidian-border;
   }
-}
-
-// 그래프 뷰 스타일링
-#notes-graph {
-  width: 100%;
-  height: calc(100% - 40px);
-  flex: 1;
-  overflow: hidden;
   
-  svg {
-    width: 100%;
+  #graph-container {
+    flex: 1;
+    height: calc(100% - 40px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+    #graph-wrapper {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      background-color: lighten($obsidian-sidebar-bg, 5%);
+      border-radius: 0.25rem;
+    }
+  }
+  
+  .resizer {
+    position: absolute;
+    left: 0;
+    top: 0;
     height: 100%;
+    width: 5px;
+    background-color: transparent;
+    cursor: ew-resize;
+    z-index: 10;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    &:active {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+// 모바일 반응형 조정
+@media screen and (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+    height: auto;
+    overflow: auto;
   }
   
-  .node {
-    cursor: pointer;
+  .left-sidebar,
+  .main-content,
+  .right-graph-sidebar {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
   }
   
-  .link {
-    stroke: $obsidian-muted;
-    stroke-opacity: 0.5;
+  .right-graph-sidebar {
+    height: 50vh;
+    
+    #graph-wrapper {
+      height: 40vh;
+    }
   }
-}
-
-// 그래프 래퍼 스타일
-#graph-wrapper {
-  width: 100%;
-  height: 100%;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-// 그래프 컨테이너 스타일 (두 번째 영역에 있는 그래프 숨기기)
-.notes-content .right-graph-container {
-  display: none !important;
-}
-
-// 오른쪽 사이드바의 그래프만 표시
-.right-graph-sidebar #notes-graph {
-  display: block !important;
 }
 
 // Sidebar styling
@@ -329,32 +348,5 @@ a {
   
   &:hover {
     text-decoration: underline;
-  }
-}
-
-// Mobile responsiveness
-@media (max-width: 768px) {
-  .content-container {
-    flex-direction: column;
-  }
-  
-  .left-sidebar, .main-content, .right-graph-sidebar {
-    width: 100%;
-    max-width: 100%;
-    border-right: none;
-  }
-  
-  .left-sidebar {
-    height: 300px;
-    border-bottom: 1px solid $obsidian-border;
-  }
-  
-  .main-content {
-    flex: 1;
-  }
-  
-  .right-graph-sidebar {
-    height: 300px;
-    border-top: 1px solid $obsidian-border;
   }
 }
